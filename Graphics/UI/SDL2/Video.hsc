@@ -19,6 +19,7 @@ data WindowOption = WindowOption Word32
 #{enum WindowOption, WindowOption
   , windowFullscreen     = SDL_WINDOW_FULLSCREEN  
   , windowOpenGl         = SDL_WINDOW_OPENGL
+  , windowShown          = SDL_WINDOW_SHOWN
   , windowHidden         = SDL_WINDOW_HIDDEN     
   , windowBorderless     = SDL_WINDOW_BORDERLESS
   , windowResizable      = SDL_WINDOW_RESIZABLE     
@@ -33,19 +34,17 @@ unWinpos (WinPos x) = x
 unWinpos WinposCentered = #const SDL_WINDOWPOS_CENTERED_MASK
 unWinpos WinposUndefined = #const SDL_WINDOWPOS_UNDEFINED_MASK
 
-createWindow str x y w h f (WindowOption p) =
-  c_createWindow str (unWinpos x) (unWinpos y) w h p
+createWindow str x y w h (WindowOption p) = do
+  cstr <- newCString str
+  cwin <- c_createWindow cstr (unWinpos x) (unWinpos y) w h p
+  return (Window cwin)
 
 
-{- extern DECLSPEC SDL_Surface * SDLCALL SDL_GetWindowSurface(SDL_Window * window); -}
 foreign import ccall unsafe "SDL2/SDL_video.h SDL_GetWindowSurface"
   c_getWindowSurface :: Ptr CWindow -> IO (Ptr CSurface) 
 
 getWindowSurface (Window ptr) = fmap Surface (c_getWindowSurface ptr)
 
-{- extern DECLSPEC SDL_Window * SDLCALL SDL_CreateWindow(const char *title,
-                                                      int x, int y, int w,
-                                                      int h, Uint32 flags); -}
 foreign import ccall unsafe "SDL2/SDL_video.h SDL_CreateWindow"
     c_createWindow  :: CString
                     -> CInt  
@@ -54,3 +53,14 @@ foreign import ccall unsafe "SDL2/SDL_video.h SDL_CreateWindow"
                     -> CInt  
                     -> Word32
                     -> IO (Ptr CWindow)
+foreign import ccall unsafe "SDL2/SDL_video.h SDL_UpdateWindowSurface"
+  c_updateWindowSurface :: Ptr CWindow -> IO CInt
+
+updateWindowSurface (Window wp) =
+  c_updateWindowSurface wp
+
+foreign import ccall unsafe "SDL2/SDL_video.h SDL_DestroyWindow"
+  c_destroyWindow :: Ptr CWindow -> IO ()
+
+destroyWindow (Window wp) = c_destroyWindow wp
+

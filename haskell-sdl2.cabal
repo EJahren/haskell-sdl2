@@ -18,6 +18,9 @@ library
   exposed-modules: Graphics.UI.SDL2.Video,
                    Graphics.UI.SDL2.Surface,
                    Graphics.UI.SDL2,
+                   Graphics.UI.SDL2.Error,
+                   Graphics.UI.SDL2.RWops,
+                   Graphics.UI.SDL2.Rect,
                    Graphics.UI.SDL2.Events,
                    Graphics.UI.SDL2.Quit
                    
