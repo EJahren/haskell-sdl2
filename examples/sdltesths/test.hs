@@ -27,17 +27,17 @@ main = do
      destroyWindow window
      c_quit
 
-mainLoop screen image window = go userEvent
+mainLoop screen image window = go
   where 
-  go e
-    | e == quit = return ()
-    | otherwise = do
+  go = do
+    blit image noRect screen noRect
+    updateWindowSurface window
+    checkEvent
+  checkEvent = do
       mevent <- pollEvent
-      case mevent of
-        Nothing -> go userEvent
-        (Just ev) -> do
-          blit image noRect screen noRect
-          updateWindowSurface window
-          go ev
-  
-    
+      case mevent of 
+        Nothing -> checkEvent
+        (Just e) -> handleEvent e
+  handleEvent e
+    | e == quit = return ()
+    | otherwise = go

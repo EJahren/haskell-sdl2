@@ -24,6 +24,7 @@ library
                    Graphics.UI.SDL2.Events,
                    Graphics.UI.SDL2.Quit
                    
+  Extra-Libraries: SDL2
   Extensions: CPP, BangPatterns, ForeignFunctionInterface
   -- other-modules:       
   build-depends:       base ==4.6.*
