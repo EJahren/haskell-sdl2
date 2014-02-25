@@ -22,22 +22,23 @@ main = do
        windowShown
      screen <- getWindowSurface window
      image <- loadBmp "sdl_logo.bmp"
-     mainLoop screen image window
+     drawImage screen image window
+     waitForExit
      freeSurface image
      destroyWindow window
      c_quit
 
-mainLoop screen image window = go
-  where 
-  go = do
-    blit image noRect screen noRect
-    updateWindowSurface window
-    checkEvent
-  checkEvent = do
-      mevent <- pollEvent
-      case mevent of 
-        Nothing -> checkEvent
-        (Just e) -> handleEvent e
-  handleEvent e
-    | e == quit = return ()
-    | otherwise = go
+waitForExit = do
+  mevent <- pollEvent
+  case mevent of 
+    Nothing -> waitForExit
+    (Just e) -> handleEvent e
+  where
+    handleEvent e
+      | e == quit = return ()
+      | e == mouseButtonDown = return ()
+      | otherwise = waitForExit
+
+drawImage screen image window = do
+  blit image noRect screen noRect
+  updateWindowSurface window

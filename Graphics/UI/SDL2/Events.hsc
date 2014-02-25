@@ -62,8 +62,10 @@ foreign import ccall unsafe "SDL2/SDL_events.h SDL_PollEvent"
 
 pollEvent = alloca (\ e -> do
   b <- c_pollEvent e
-  a <- peek e
-  if b == 0 
-    then return (Just (Event a))
-    else return Nothing)
+  if b > 0 
+    then do
+      a <- peek e
+      return (Just (Event a))
+    else
+      return Nothing)
   
