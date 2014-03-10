@@ -1,10 +1,11 @@
 module Graphics.UI.SDL2.Surface where
 {-# LANGUAGE CPP, BangPatterns, ForeignFunctionInterface #-}
 import Foreign
+import Foreign.C
 import Foreign.C.String
 import Foreign.C.Types
-import Graphics.UI.SDL2.RWops
-import Graphics.UI.SDL2.Rect
+{# import Graphics.UI.SDL2.RWops #}
+{# import Graphics.UI.SDL2.Rect #}
 
 
 #include <SDL2/SDL_surface.h>

@@ -1,6 +1,7 @@
-module Graphics.UI.SDL2.RWops where
 {-# LANGUAGE CPP, BangPatterns, ForeignFunctionInterface #-}
+module Graphics.UI.SDL2.RWops where
 import Foreign
+import Foreign.C
 import Foreign.C.String
 import Foreign.C.Types
 
