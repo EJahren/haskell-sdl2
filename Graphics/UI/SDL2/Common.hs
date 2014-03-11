@@ -1,4 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 module Graphics.UI.SDL2.Common where
 
-enumMarshal = fromIntegral . fromEnum
+enumToC = fromIntegral . fromEnum
+enumFromC = toEnum . fromIntegral

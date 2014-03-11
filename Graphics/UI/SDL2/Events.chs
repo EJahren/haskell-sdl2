@@ -10,6 +10,9 @@ import Foreign.C.Types
 import Foreign.Marshal.Alloc
 import Foreign.Storable
 
+import Control.Monad
+
+import Graphics.UI.SDL2.Common
 {# import Graphics.UI.SDL2.Video #}
 {# import Graphics.UI.SDL2.Keyboard #}
 {# import Graphics.UI.SDL2.Joystick #}
@@ -27,167 +30,258 @@ import Foreign.Storable
 type ButtonState = KeyState
 
 data CommonEventData = CommonEventData {
-  timestamp :: Word32,
   windowID  :: Word32} deriving(Eq,Ord,Show)
 
 data KeyEvent = KeyEvent deriving(Eq,Ord,Show)
 
-data MouseInfo = MouseInfo{
-  which :: Word32,
-  buttonState :: ButtonState,
-  xCoord :: Int,
-  yCoord :: Int} deriving (Eq,Ord,Show)
-
 {#enum SDL_EventType as EventType
    {underscoreToCase} deriving (Eq,Ord,Show)#}
 
-
-data Event = Event{
-  commonData :: CommonEventData,
-  eventData :: EventData
-}
+peekKey c p tmstmp = do
+  st <- liftM enumFromC ({#get SDL_Event.key.state#} p)
+  wId <- liftM fromIntegral ({#get SDL_Event.key.windowID#} p)
+  rp <- liftM enumFromC ({#get SDL_Event.key.repeat #} p)
+  sym <- liftM enumFromC ({#get SDL_Event.key.keysym.scancode#} p)
+  kc <- liftM enumFromC ({#get SDL_Event.key.keysym.sym#} p)
+  md <- liftM enumFromC ({#get SDL_Event.key.keysym.mod#} p)
+  return (c tmstmp wId st rp (Keysym sym kc md)) 
 
 instance Storable Event where
   sizeOf _ = {#sizeof SDL_Event #}
   alignment _ = 4
-  peek p = Event
-    <$> liftM peek ({#get SDL_Event->common #} p)
-    <*> makeEventData p
-  poke p x = do
+  peek p = do
+    t <- liftM enumFromC ({#get SDL_Event.type#} p)
+    tmstmp <- liftM fromIntegral ({#get SDL_Event.common.timestamp#} p)
+    case t of
+      SdlFirstevent -> return (FirstEvent tmstmp)
+      SdlQuit -> return (Quit tmstmp)
+      SdlAppTerminating -> return (AppTerminating tmstmp)
+      SdlAppLowmemory -> return (AppLowMemory tmstmp)
+      SdlAppWillenterbackground  -> return (AppWillEnterBackground tmstmp)
+      SdlAppDidenterbackground  -> return (AppDidEnterBackground tmstmp)
+      SdlAppWillenterforeground  -> return (AppWillEnterForeground tmstmp)
+      SdlAppDidenterforeground  -> return (AppDidEnterForeground tmstmp)
+      SdlWindowevent -> do
+        winEvId <- liftM enumFromC ({#get SDL_Event.window.event#} p)
+        wId <- liftM fromIntegral ({#get SDL_Event.window.windowID#} p)
+        return (WindowEvent tmstmp wId winEvId)
+      SdlSyswmevent -> return (SysWMEvent tmstmp)
+      SdlKeydown -> peekKey KeyDown p tmstmp
+      SdlKeyup -> peekKey KeyUp p tmstmp
+      SdlTextediting -> do
+        wID <- liftM fromIntegral ({#get SDL_Event.edit.windowID#} p)
+        txt <- {#get SDL_Event.edit.text#} p  >>= peekCString
+        strt <- liftM fromIntegral ({#get SDL_Event.edit.start#} p)
+        len <- liftM fromIntegral ({#get SDL_Event.edit.length#} p)
+        return (TextEditing tmstmp wID txt strt len)
+      SdlTextinput -> undefined
+      SdlMousemotion -> undefined
+      SdlMousebuttondown -> undefined
+      SdlMousebuttonup -> undefined
+      SdlMousewheel -> undefined
+      SdlJoyaxismotion -> undefined
+      SdlJoyballmotion -> undefined
+      SdlJoyhatmotion -> undefined
+      SdlJoybuttondown -> undefined
+      SdlJoybuttonup -> undefined
+      SdlJoydeviceadded -> undefined
+      SdlJoydeviceremoved -> undefined
+      SdlControlleraxismotion -> undefined
+      SdlControllerbuttondown -> undefined
+      SdlControllerbuttonup -> undefined
+      SdlControllerdeviceadded -> undefined
+      SdlControllerdeviceremoved -> undefined
+      SdlControllerdeviceremapped -> undefined
+      SdlFingerdown -> undefined
+      SdlFingerup -> undefined
+      SdlFingermotion -> undefined
+      SdlDollargesture -> undefined
+      SdlDollarrecord -> undefined
+      SdlMultigesture -> undefined
+      SdlClipboardupdate -> undefined
+      SdlDropfile -> undefined
+      SdlUserevent -> undefined
+      SdlLastevent -> undefined
+
+  poke p x = undefined
+  {-do
     cmn <- {#get SDL_Event.common #} p
     poke p (commonData x)
-    pokeEventData p x
+    pokeEventData p x -}
 
-data EventData =
-     FirstEvent
-   | Quit
-   | AppTerminating
-   | AppLowMemory
-   | AppWillEnterBackground
-   | AppDidEnterBackground
-   | AppWillEnterForeground
-   | AppDidEnterForeground
-   | WindowEvent WindowEventID
-   | SysWMEvent
+data Event =
+     FirstEvent{
+       timestamp :: Word32}
+   | Quit{
+       timestamp :: Word32}
+   | AppTerminating{
+       timestamp :: Word32}
+   | AppLowMemory{
+       timestamp :: Word32}
+   | AppWillEnterBackground{
+       timestamp :: Word32}
+   | AppDidEnterBackground{
+       timestamp :: Word32}
+   | AppWillEnterForeground{
+       timestamp :: Word32}
+   | AppDidEnterForeground{
+       timestamp :: Word32}
+   | WindowEvent{
+       timestamp  :: Word32,
+       winID      :: Word32,
+       winEventId :: WindowEventID} 
+   | SysWMEvent{
+       timestamp :: Word32}
    | KeyDown{
-       state     :: KeyState,
-       isRepeat  :: Bool,
-       keysym    :: Keysym}
+       timestamp  :: Word32,
+       winID      :: Word32,
+       state      :: KeyState,
+       isRepeat   :: Bool,
+       keysym     :: Keysym}
    | KeyUp{
-       state     :: KeyState,
-       isRepeat  :: Bool,
-       keysym    :: Keysym}
+       timestamp  :: Word32,
+       winID      :: Word32,
+       state      :: KeyState,
+       isRepeat   :: Bool,
+       keysym     :: Keysym}
    | TextEditing{
-       text   :: String,
-       start  :: Int,
-       length :: Int}
+       timestamp  :: Word32,
+       winID      :: Word32,
+       text       :: String,
+       start      :: Int,
+       length     :: Int}
    | TextInput{
-       text :: String}
+       timestamp  :: Word32,
+       text       :: String}
    | MouseMotion{
-       whichMouse :: MouseInfo,
+       timestamp  :: Word32,
+       whichMouse :: Word32,
        xRel       :: Int,
        yRel       :: Int}
    | MouseButtonDown {
-       whichMouse  :: MouseInfo,
+       timestamp   :: Word32,
+       whichMouse  :: Word32,
        whichButton :: Word8}
    | MouseButtonUp {
-       whichMouse  :: MouseInfo,
+       timestamp   :: Word32,
+       whichMouse  :: Word32,
        whichButton :: Word8}
    | MouseWheel {
-       mouseId :: Word32,
-       xScrol :: Int,
-       yScrol :: Int}
+       timestamp  :: Word32,
+       mouseId    :: Word32,
+       xScrol     :: Int,
+       yScrol     :: Int}
    | JoyAxisMotion {
-       whichJS   :: JoystickID,
-       axis      :: Word8,
-       value     :: Int16}
+       timestamp  :: Word32,
+       whichJS    :: JoystickID,
+       axis       :: Word8,
+       value      :: Int16}
    | JoyBallMotion{
-       whichJS :: JoystickID,
-       ball    :: Word8,
-       xRel   :: Int,
-       yRel   :: Int}
+       timestamp  :: Word32,
+       whichJS    :: JoystickID,
+       ball       :: Word8,
+       xRel       :: Int,
+       yRel       :: Int}
    | JoyHatMotion{
-       whichJS :: JoystickID,
-       hat     :: Word8,
-       pos     :: HatPos}
+       timestamp  :: Word32,
+       whichJS    :: JoystickID,
+       hat        :: Word8,
+       pos        :: HatPos}
    | JoyButtonDown{
-       whichJS :: JoystickID,
+       timestamp     :: Word32,
+       whichJS       :: JoystickID,
        whichButtonJS :: Word8,
        buttonStateJS :: ButtonState}
    | JoyButtonUp{
-       whichJS :: JoystickID,
+       timestamp     :: Word32,
+       whichJS       :: JoystickID,
        whichButtonJS :: Word8,
        buttonStateJS :: ButtonState}
    | JoyDeviceAdded{
-       whichJS :: JoystickID}
+       timestamp  :: Word32,
+       whichJS    :: JoystickID}
    | JoyDeviceRemoved{
-       whichJS :: JoystickID}
+       timestamp  :: Word32,
+       whichJS    :: JoystickID}
    | ControllerAxisMotion{
-       whichCtrl :: JoystickID,
-       axis      :: Word8,
-       value     :: Int16}
+       timestamp  :: Word32,
+       whichCtrl  :: JoystickID,
+       axis       :: Word8,
+       value      :: Int16}
    | ControllerButtonDown{
+       timestamp        :: Word32,
        whichCtrl        :: JoystickID,
        whichButtonCtrlr :: Word8,
        buttonStateCtrlr :: ButtonState}
    | ControllerButtonUp{
+       timestamp        :: Word32,
        whichCtrl        :: JoystickID,
        whichButtonCtrlr :: Word8,
        buttonStateCtrlr :: ButtonState}
    | ControllerDeviceAdded{
+       timestamp  :: Word32,
        whichCtrlr :: JoystickID}
    | ControllerDeviceRemoved{
+       timestamp  :: Word32,
        whichCtrlr :: JoystickID}
    | ControllerDeviceRemapped{
+       timestamp  :: Word32,
        whichCtrlr :: JoystickID}
    | FingerDown {
+       timestamp  :: Word32,
        touchId    :: TouchID,
        fingerId   :: FingerID,
        xRng       :: Float,
        yRng       :: Float,
        deltax     :: Float,
        deltay     :: Float,
-       pressure   :: Float
-     }
+       pressure   :: Float}
    | FingerUp{
+       timestamp  :: Word32,
        touchId    :: TouchID,
        fingerId   :: FingerID,
        xRng       :: Float,
        yRng       :: Float,
        deltax     :: Float,
        deltay     :: Float,
-       pressure   :: Float
-     }
+       pressure   :: Float}
    | FingerMotion{
+       timestamp  :: Word32,
        touchId    :: TouchID,
        fingerId   :: FingerID,
        xRng       :: Float,
        yRng       :: Float,
        deltax     :: Float,
        deltay     :: Float,
-       pressure   :: Float
-     }
+       pressure   :: Float}
    | DollarGesture{
+       timestamp  :: Word32,
        touchId    :: TouchID,
        gestureId  :: GestureID,
-       numFingers :: Int
-     }
-   | DollarRecord
+       numFingers :: Int}
+   | DollarRecord{
+       timestamp  :: Word32}
    | MultiGesture{
-      touchId     :: TouchID,
-      dTheta      :: Float,
-      dDist       :: Float,
-      xRng        :: Float,
-      yRng        :: Float,
-      numFingers  :: Int
-     }
-   | ClipBoardUpdate
+       timestamp  :: Word32,
+       touchId    :: TouchID,
+       dTheta     :: Float,
+       dDist      :: Float,
+       xRng       :: Float,
+       yRng       :: Float,
+       numFingers :: Int}
+   | ClipBoardUpdate{
+       timestamp  :: Word32}
    | DropFile{
-      file :: FilePath}
-   | UserEvent
-   | LastEvent
+       timestamp  :: Word32,
+       file       :: FilePath}
+   | UserEvent{
+       timestamp  :: Word32}
+   | LastEvent{
+       timestamp  :: Word32}
     deriving (Eq, Ord, Show)
 
-{#fun SDL_PollEvent as c_pollEvent {alloca- `Ptr EventType' peek*} -> `Int' #}
+{#pointer *SDL_Event as EventPtr -> Event#}
+
+{#fun SDL_PollEvent as c_pollEvent {alloca- `Event' peek*} -> `Int' #}
 
 

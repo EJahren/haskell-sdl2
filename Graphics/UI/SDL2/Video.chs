@@ -43,8 +43,8 @@ foreign import ccall unsafe "SDL2/SDL_video.h SDL_GetWindowSurface"
 getWindowSurface (Window ptr) = fmap Surface (c_getWindowSurface ptr)
 
 {#fun unsafe SDL_CreateWindow as createWindow
- {`String',enumMarshal `WinPos',enumMarshal `WinPos',
-  `Int',`Int',enumMarshal `WindowFlag'} -> `Window' Window #} 
+ {`String',enumToC `WinPos',enumToC `WinPos',
+  `Int',`Int',enumToC `WindowFlag'} -> `Window' Window #} 
 
 foreign import ccall unsafe "SDL2/SDL_video.h SDL_UpdateWindowSurface"
   c_updateWindowSurface :: Ptr CWindow -> IO CInt
