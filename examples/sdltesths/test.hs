@@ -6,7 +6,7 @@ windowHeight = 240
 windowTitle = "SDL2 Test"
 
 main = do
- b <- sdlInit initVideo
+ b <- sdlInit InitVideo
  if b > 0
    then do
      err <- c_getError
@@ -15,11 +15,11 @@ main = do
    else do
      window <- createWindow
        windowTitle
-       WinposCentered
-       WinposCentered
+       WinPosCentered
+       WinPosCentered
        windowWidth
        windowHeight
-       windowShown
+       WindowShown
      screen <- getWindowSurface window
      image <- loadBmp "sdl_logo.bmp"
      drawImage screen image window
@@ -29,15 +29,14 @@ main = do
      c_quit
 
 waitForExit = do
-  mevent <- pollEvent
-  case mevent of 
+  me <- pollEvent
+  case me of
     Nothing -> waitForExit
     (Just e) -> handleEvent e
   where
-    handleEvent e
-      | e == quit = return ()
-      | e == mouseButtonDown = return ()
-      | otherwise = waitForExit
+    handleEvent Quit{} = return ()
+    handleEvent MouseButtonDown{} = return ()
+    handleEvent _ = waitForExit
 
 drawImage screen image window = do
   blit image noRect screen noRect

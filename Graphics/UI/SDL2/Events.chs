@@ -38,19 +38,19 @@ data KeyEvent = KeyEvent deriving(Eq,Ord,Show)
    {underscoreToCase} deriving (Eq,Ord,Show)#}
 
 peekKey c p tmstmp = do
-  st <- liftM enumFromC ({#get SDL_Event.key.state#} p)
+  st <- liftM enumFromC  ({#get SDL_Event.key.state#} p)
   wId <- liftM fromIntegral ({#get SDL_Event.key.windowID#} p)
-  rp <- liftM enumFromC ({#get SDL_Event.key.repeat #} p)
-  sym <- liftM enumFromC ({#get SDL_Event.key.keysym.scancode#} p)
-  kc <- liftM enumFromC ({#get SDL_Event.key.keysym.sym#} p)
-  md <- liftM enumFromC ({#get SDL_Event.key.keysym.mod#} p)
+  rp <- liftM enumFromC  ({#get SDL_Event.key.repeat #} p)
+  sym <- liftM enumFromC  ({#get SDL_Event.key.keysym.scancode#} p)
+  kc <- liftM enumFromC  ({#get SDL_Event.key.keysym.sym#} p)
+  md <- liftM enumFromC  ({#get SDL_Event.key.keysym.mod#} p)
   return (c tmstmp wId st rp (Keysym sym kc md)) 
 
 instance Storable Event where
   sizeOf _ = {#sizeof SDL_Event #}
-  alignment _ = 4
+  alignment _ = {#alignof SDL_Event #}
   peek p = do
-    t <- liftM enumFromC ({#get SDL_Event.type#} p)
+    t <- liftM enumFromC  ({#get SDL_Event.type#} p)
     tmstmp <- liftM fromIntegral ({#get SDL_Event.common.timestamp#} p)
     case t of
       SdlFirstevent -> return (FirstEvent tmstmp)
@@ -282,6 +282,16 @@ data Event =
 
 {#pointer *SDL_Event as EventPtr -> Event#}
 
-{#fun SDL_PollEvent as c_pollEvent {alloca- `Event' peek*} -> `Int' #}
+pollEvent :: IO (Maybe Event)
+pollEvent = alloca (\eventptr -> do
+  res <- c_pollEvent eventptr
+  if res < 1
+    then return Nothing
+    else do
+      event <- peek eventptr
+      return (Just event))
 
+
+foreign import ccall safe "Graphics/UI/SDL2/Events.chs.h SDL_PollEvent"
+  c_pollEvent :: (EventPtr -> IO CInt)
 
