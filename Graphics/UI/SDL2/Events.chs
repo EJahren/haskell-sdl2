@@ -11,6 +11,8 @@ import Foreign.Marshal.Alloc
 import Foreign.Storable
 
 import Control.Monad
+import Data.Functor
+import Control.Applicative
 
 import Graphics.UI.SDL2.Common
 {# import Graphics.UI.SDL2.Video #}
@@ -46,58 +48,162 @@ peekKey c p tmstmp = do
   md <- liftM enumFromC  ({#get SDL_Event.key.keysym.mod#} p)
   return (c tmstmp wId st rp (Keysym sym kc md)) 
 
+peekButton c p tmstmp = do
+  wID <- fromIntegral <$> {#get SDL_Event.button.windowID#} p
+  which <- fromIntegral <$> {#get SDL_Event.button.which#} p
+  st <- enumFromC <$> {#get SDL_Event.button.state#} p
+  bt <- fromIntegral <$> {#get SDL_Event.button.button#} p
+  x <- fromIntegral <$> {#get SDL_Event.button.x#} p
+  y <- fromIntegral <$> {#get SDL_Event.button.y#} p
+  return (c tmstmp wID which st bt x y)
+
+peekJoyButton c p tmstmp = do
+  which <- fromIntegral <$> {#get SDL_Event.jbutton.which#} p
+  bt <- fromIntegral <$> {#get SDL_Event.jbutton.button#} p
+  st <- enumFromC <$> {#get SDL_Event.jbutton.state#} p
+  return (c tmstmp which bt st)
+
+peekJoyDevice c p tmstmp = do
+  which <- fromIntegral <$> {#get SDL_Event.jdevice.which#} p
+  return (c tmstmp which)
+
+peekContrButton c p tmstmp = do
+  which <- fromIntegral <$> {#get SDL_Event.cbutton.which#} p
+  bt <- fromIntegral <$> {#get SDL_Event.cbutton.button#} p
+  st <- enumFromC <$> {#get SDL_Event.cbutton.state#} p :: IO ButtonState
+  return (c tmstmp which bt st)
+  
+peekContrDevice  c p tmstmp = do
+  which <- fromIntegral <$> {#get SDL_Event.cdevice.which#} p
+  return (c tmstmp which)
+
+peekFinger  c p tmstmp = do
+  tId <- fromIntegral <$> {#get SDL_Event.tfinger.touchId#} p
+  fId <- fromIntegral <$> {#get SDL_Event.tfinger.fingerId#} p
+  x   <- realToFrac   <$> {#get SDL_Event.tfinger.x#} p
+  y   <- realToFrac   <$> {#get SDL_Event.tfinger.y#} p
+  dx  <- realToFrac   <$> {#get SDL_Event.tfinger.dx#} p
+  dy  <- realToFrac   <$> {#get SDL_Event.tfinger.dy#} p
+  pr  <- realToFrac   <$> {#get SDL_Event.tfinger.pressure#} p
+  return (c tmstmp tId fId x y dx dy pr)
+
 instance Storable Event where
   sizeOf _ = {#sizeof SDL_Event #}
   alignment _ = {#alignof SDL_Event #}
   peek p = do
-    t <- liftM enumFromC  ({#get SDL_Event.type#} p)
-    tmstmp <- liftM fromIntegral ({#get SDL_Event.common.timestamp#} p)
+    t <- enumFromC <$> {#get SDL_Event.type#} p
+    tmstmp <- fromIntegral <$> {#get SDL_Event.common.timestamp#} p
     case t of
-      SdlFirstevent -> return (FirstEvent tmstmp)
-      SdlQuit -> return (Quit tmstmp)
-      SdlAppTerminating -> return (AppTerminating tmstmp)
-      SdlAppLowmemory -> return (AppLowMemory tmstmp)
-      SdlAppWillenterbackground  -> return (AppWillEnterBackground tmstmp)
-      SdlAppDidenterbackground  -> return (AppDidEnterBackground tmstmp)
-      SdlAppWillenterforeground  -> return (AppWillEnterForeground tmstmp)
-      SdlAppDidenterforeground  -> return (AppDidEnterForeground tmstmp)
-      SdlWindowevent -> do
-        winEvId <- liftM enumFromC ({#get SDL_Event.window.event#} p)
-        wId <- liftM fromIntegral ({#get SDL_Event.window.windowID#} p)
-        return (WindowEvent tmstmp wId winEvId)
+      SdlFirstevent ->
+        return (FirstEvent tmstmp)
+      SdlQuit ->
+        return (Quit tmstmp)
+      SdlAppTerminating ->
+        return (AppTerminating tmstmp)
+      SdlAppLowmemory ->
+        return (AppLowMemory tmstmp)
+      SdlAppWillenterbackground  ->
+        return (AppWillEnterBackground tmstmp)
+      SdlAppDidenterbackground  ->
+        return (AppDidEnterBackground tmstmp)
+      SdlAppWillenterforeground  ->
+        return (AppWillEnterForeground tmstmp)
+      SdlAppDidenterforeground  ->
+        return (AppDidEnterForeground tmstmp)
+      SdlWindowevent ->
+        liftM2 (WindowEvent tmstmp)
+          (fromIntegral <$> {#get SDL_Event.window.windowID#} p)
+          (enumFromC    <$> {#get SDL_Event.window.event#}    p)
       SdlSyswmevent -> return (SysWMEvent tmstmp)
       SdlKeydown -> peekKey KeyDown p tmstmp
       SdlKeyup -> peekKey KeyUp p tmstmp
-      SdlTextediting -> do
-        wID <- liftM fromIntegral ({#get SDL_Event.edit.windowID#} p)
-        txt <- {#get SDL_Event.edit.text#} p  >>= peekCString
-        strt <- liftM fromIntegral ({#get SDL_Event.edit.start#} p)
-        len <- liftM fromIntegral ({#get SDL_Event.edit.length#} p)
-        return (TextEditing tmstmp wID txt strt len)
-      SdlTextinput -> undefined
-      SdlMousemotion -> undefined
-      SdlMousebuttondown -> undefined
-      SdlMousebuttonup -> undefined
-      SdlMousewheel -> undefined
-      SdlJoyaxismotion -> undefined
-      SdlJoyballmotion -> undefined
-      SdlJoyhatmotion -> undefined
-      SdlJoybuttondown -> undefined
-      SdlJoybuttonup -> undefined
-      SdlJoydeviceadded -> undefined
-      SdlJoydeviceremoved -> undefined
-      SdlControlleraxismotion -> undefined
-      SdlControllerbuttondown -> undefined
+      SdlTextediting ->
+        liftM4 (TextEditing tmstmp)
+          (fromIntegral <$> {#get SDL_Event.edit.windowID#} p)
+          ({#get SDL_Event.edit.text#} p  >>= peekCString)
+          (fromIntegral <$> {#get SDL_Event.edit.start#}    p)
+          (fromIntegral <$> {#get SDL_Event.edit.length#}   p)
+      SdlTextinput -> do
+        liftM2 (TextInput tmstmp)
+          (fromIntegral <$> {#get SDL_Event.text.windowID#} p)
+          ({#get SDL_Event.text.text#} p  >>= peekCString)
+      SdlMousemotion ->
+        MouseMotion tmstmp <$>
+          (fromIntegral <$> {#get SDL_Event.motion.windowID#} p) <*> 
+          (fromIntegral <$> {#get SDL_Event.motion.which#}    p) <*>
+          (enumFromC <$> {#get SDL_Event.motion.state#}       p) <*>
+          (fromIntegral <$> {#get SDL_Event.motion.x#}        p) <*>
+          (fromIntegral <$> {#get SDL_Event.motion.y#}        p) <*>
+          (fromIntegral <$> {#get SDL_Event.motion.xrel#}     p) <*>
+          (fromIntegral <$> {#get SDL_Event.motion.yrel#}     p)
+      SdlMousebuttondown -> 
+        peekButton MouseButtonDown p tmstmp
+      SdlMousebuttonup ->
+        peekButton MouseButtonUp p tmstmp
+      SdlMousewheel ->
+        liftM4 (MouseWheel tmstmp)
+          (fromIntegral <$> {#get SDL_Event.motion.windowID#} p)
+          (fromIntegral <$> {#get SDL_Event.motion.which#}    p)
+          (fromIntegral <$> {#get SDL_Event.motion.x#}        p)
+          (fromIntegral <$> {#get SDL_Event.motion.y#}        p)
+      SdlJoyaxismotion ->
+        liftM3 (JoyAxisMotion tmstmp)
+          (fromIntegral <$> {#get SDL_Event.jaxis.which#} p)
+          (fromIntegral <$> {#get SDL_Event.jaxis.axis#}  p)
+          (fromIntegral <$> {#get SDL_Event.jaxis.value#}  p)
+      SdlJoyballmotion -> 
+        liftM4 (JoyBallMotion tmstmp)
+          (fromIntegral <$> {#get SDL_Event.jball.which#} p)
+          (fromIntegral <$> {#get SDL_Event.jball.ball#}  p)
+          (fromIntegral <$> {#get SDL_Event.jball.xrel#}  p)
+          (fromIntegral <$> {#get SDL_Event.jball.yrel#}  p)
+      SdlJoyhatmotion -> 
+        liftM3 (JoyHatMotion tmstmp)
+          (fromIntegral <$> {#get SDL_Event.jhat.which#} p)
+          (fromIntegral <$> {#get SDL_Event.jhat.hat#} p)
+          (enumFromC    <$> {#get SDL_Event.jhat.hat#} p)
+      SdlJoybuttondown -> peekJoyButton JoyButtonDown p tmstmp
+      SdlJoybuttonup -> peekJoyButton JoyButtonUp p tmstmp
+      SdlJoydeviceadded -> peekJoyDevice JoyDeviceAdded p tmstmp
+      SdlJoydeviceremoved -> peekJoyDevice JoyDeviceRemoved p tmstmp
+      SdlControlleraxismotion ->
+        liftM3 (ControllerAxisMotion tmstmp)
+          (fromIntegral <$> {#get SDL_Event.caxis.which#} p)
+          (fromIntegral <$> {#get SDL_Event.caxis.axis#} p)
+          (fromIntegral <$> {#get SDL_Event.caxis.value#} p)
+      SdlControllerbuttondown ->
+        peekContrButton ControllerButtonDown p tmstmp
       SdlControllerbuttonup -> undefined
-      SdlControllerdeviceadded -> undefined
-      SdlControllerdeviceremoved -> undefined
-      SdlControllerdeviceremapped -> undefined
-      SdlFingerdown -> undefined
-      SdlFingerup -> undefined
-      SdlFingermotion -> undefined
-      SdlDollargesture -> undefined
+        peekContrButton ControllerButtonUp p tmstmp
+      SdlControllerdeviceadded ->
+        peekContrDevice ControllerDeviceAdded p tmstmp
+      SdlControllerdeviceremoved ->
+        peekContrDevice ControllerDeviceRemoved p tmstmp
+      SdlControllerdeviceremapped ->
+        peekContrDevice ControllerDeviceAdded p tmstmp
+      SdlFingerdown ->
+        peekFinger FingerDown p tmstmp
+      SdlFingerup ->
+        peekFinger FingerUp p tmstmp
+      SdlFingermotion ->
+        peekFinger FingerMotion p tmstmp
+      SdlMultigesture ->
+        MultiGesture tmstmp <$>
+          (fromIntegral <$> {#get SDL_Event.mgesture.touchId#} p) <*>
+          (realToFrac   <$> {#get SDL_Event.mgesture.dTheta#}  p) <*>
+          (realToFrac   <$> {#get SDL_Event.mgesture.dDist#}  p) <*>
+          (realToFrac   <$> {#get SDL_Event.mgesture.x#}  p) <*>
+          (realToFrac   <$> {#get SDL_Event.mgesture.y#}  p) <*>
+          (fromIntegral <$> {#get SDL_Event.mgesture.numFingers#}  p)
+      SdlDollargesture ->
+        DollarGesture tmstmp <$>
+          (fromIntegral <$> {#get SDL_Event.dgesture.touchId#} p) <*>
+          (fromIntegral <$> {#get SDL_Event.dgesture.gestureId#}  p) <*>
+          (fromIntegral <$> {#get SDL_Event.dgesture.numFingers#}  p) <*>
+          (realToFrac   <$> {#get SDL_Event.dgesture.error#}  p) <*>
+          (realToFrac   <$> {#get SDL_Event.dgesture.x#}  p) <*>
+          (realToFrac   <$> {#get SDL_Event.dgesture.y#}  p)
       SdlDollarrecord -> undefined
-      SdlMultigesture -> undefined
       SdlClipboardupdate -> undefined
       SdlDropfile -> undefined
       SdlUserevent -> undefined
@@ -152,22 +258,36 @@ data Event =
        length     :: Int}
    | TextInput{
        timestamp  :: Word32,
+       winID      :: Word32,
        text       :: String}
    | MouseMotion{
-       timestamp  :: Word32,
-       whichMouse :: Word32,
-       xRel       :: Int,
-       yRel       :: Int}
+       timestamp   :: Word32,
+       whichMouse  :: Word32,
+       winID      :: Word32,
+       buttonState :: ButtonState,
+       x           :: Int,
+       y           :: Int,
+       xRel        :: Int,
+       yRel        :: Int}
    | MouseButtonDown {
        timestamp   :: Word32,
+       winID      :: Word32,
        whichMouse  :: Word32,
-       whichButton :: Word8}
+       buttonState :: ButtonState,
+       whichButton :: Word8,
+       x           :: Int,
+       y           :: Int}
    | MouseButtonUp {
        timestamp   :: Word32,
+       winID      :: Word32,
        whichMouse  :: Word32,
-       whichButton :: Word8}
+       buttonState :: ButtonState,
+       whichButton :: Word8,
+       x           :: Int,
+       y           :: Int}
    | MouseWheel {
        timestamp  :: Word32,
+       winID      :: Word32,
        mouseId    :: Word32,
        xScrol     :: Int,
        yScrol     :: Int}
@@ -258,7 +378,10 @@ data Event =
        timestamp  :: Word32,
        touchId    :: TouchID,
        gestureId  :: GestureID,
-       numFingers :: Int}
+       numFingers :: Int,
+       derror     :: Float,
+       xCent      :: Float,
+       yCent      :: Float}
    | DollarRecord{
        timestamp  :: Word32}
    | MultiGesture{

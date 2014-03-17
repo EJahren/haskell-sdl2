@@ -1,4 +1,3 @@
-module Graphics.UI.SDL2.Tests.Interactive.SdlLogo (showLogo) where
 import Graphics.UI.SDL2
 
 windowWidth  = 320
@@ -6,15 +5,13 @@ windowHeight = 240
 
 windowTitle = "SDL2 Test"
 
-showLogo = do
- 
+main = do
  b <- sdlInit InitVideo
  if b > 0
    then do
      err <- c_getError
      putStrLn ("SDL2 could not initialize! SDL2_error "
        ++ show err)
-     return False
    else do
      window <- createWindow
        windowTitle
@@ -22,26 +19,24 @@ showLogo = do
        WinPosCentered
        windowWidth
        windowHeight
-       windowShown
+       WindowShown
      screen <- getWindowSurface window
      image <- loadBmp "sdl_logo.bmp"
      drawImage screen image window
-     b <- waitForResult
+     waitForExit
      freeSurface image
      destroyWindow window
      c_quit
-     return b
 
-waitForResult = do
-  mevent <- pollEvent
-  case mevent of 
-    Nothing -> waitForResult
+waitForExit = do
+  me <- pollEvent
+  case me of
+    Nothing -> waitForExit
     (Just e) -> handleEvent e
   where
-    handleEvent e
-      | eventType e == keyDown =
-        return True 
-      | otherwise = waitForResult
+    handleEvent Quit{} = return ()
+    handleEvent MouseButtonDown{} = return ()
+    handleEvent _ = waitForExit
 
 drawImage screen image window = do
   blit image noRect screen noRect
