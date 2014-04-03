@@ -22,7 +22,7 @@ library
     Graphics.UI.SDL2.Rect,
     Graphics.UI.SDL2.Surface,
     Graphics.UI.SDL2.Video,
-    Graphics.UI.SDL2.Error,
+    Graphics.UI.SDL2.Render,
     Graphics.UI.SDL2.Scancode,
     Graphics.UI.SDL2.Keycode,
     Graphics.UI.SDL2.Touch,
@@ -32,7 +32,9 @@ library
     Graphics.UI.SDL2.Events,
     Graphics.UI.SDL2
                    
-  other-modules: Graphics.UI.SDL2.Common
+  other-modules: 
+    Graphics.UI.SDL2.Error,
+    Graphics.UI.SDL2.Common
   extra-libraries: SDL2
   Extensions:
     CPP,

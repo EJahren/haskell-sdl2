@@ -44,7 +44,7 @@ getWindowSurface (Window ptr) = fmap Surface (c_getWindowSurface ptr)
 
 {#fun unsafe SDL_CreateWindow as createWindow
  {`String',enumToC `WinPos',enumToC `WinPos',
-  `Int',`Int',enumToC `WindowFlag'} -> `Window' Window #} 
+  `Int',`Int',flagToC `[WindowFlag]'} -> `Window' Window #} 
 
 foreign import ccall unsafe "SDL2/SDL_video.h SDL_UpdateWindowSurface"
   c_updateWindowSurface :: Ptr CWindow -> IO CInt

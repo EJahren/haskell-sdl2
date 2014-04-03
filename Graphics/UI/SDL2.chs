@@ -42,4 +42,4 @@ import Graphics.UI.SDL2.Common
   } deriving (Eq,Ord,Show) #}
 
 {#fun unsafe SDL_Init as sdlInit
-  {enumToC `InitOption'} -> `Int' #}
+  {flagToC `[InitOption]'} -> `()' checkError*-#}

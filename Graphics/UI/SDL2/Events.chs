@@ -725,6 +725,3 @@ instance Storable Event where
         setType SdlUserevent
       LastEvent{} ->
         setType SdlLastevent
-      
-  
-
