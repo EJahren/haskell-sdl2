@@ -1,3 +1,4 @@
+module Interactive.SdlLogo where
 import Graphics.UI.SDL2
 
 windowWidth  = 320
@@ -5,7 +6,7 @@ windowHeight = 240
 
 windowTitle = "SDL2 Test"
 
-main = do
+showLogo logo = do
  sdlInit [InitVideo]
  window <- createWindow
    windowTitle
@@ -15,12 +16,13 @@ main = do
    windowHeight
    [WindowShown]
  screen <- getWindowSurface window
- image <- loadBmp "sdl_logo.bmp"
+ image <- loadBmp logo
  drawImage screen image window
  waitForExit
  freeSurface image
  destroyWindow window
  c_quit
+ return True
 
 waitForExit = do
   me <- pollEvent
