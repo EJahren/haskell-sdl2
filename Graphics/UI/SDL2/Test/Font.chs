@@ -12,6 +12,7 @@ import Foreign.C.String
 import Foreign.C.Types
 
 {# import Graphics.UI.SDL2.Render #}
+{# import Graphics.UI.SDL2.Foreign.Renderer#}
 {# import Graphics.UI.SDL2.Error #}
 
 #include <SDL2/SDL.h>

@@ -5,18 +5,16 @@ import Foreign.C
 import Foreign.C.String
 import Foreign.C.Types
 
+import Control.Monad
+
 import Graphics.UI.SDL2.Common
-{# import Graphics.UI.SDL2.Surface #}
+{#import Graphics.UI.SDL2.Surface #}
+{#import Graphics.UI.SDL2.Error #}
+{#import Graphics.UI.SDL2.Foreign.Window#}
+{#import Graphics.UI.SDL2.Foreign.Surface#}
 
 #include <SDL2/SDL_video.h>
 {#context lib = "sdl2" prefix = "SDL" #}
-
-type CWindow = ()
-
-data Window = Window {
-  unWindow :: !(Ptr CWindow)
-  } deriving (Eq, Ord, Show)
-
 
 {#enum SDL_WindowFlags as WindowFlag
    {underscoreToCase} deriving (Show,Eq,Ord)#}
@@ -32,27 +30,13 @@ data Window = Window {
   deriving (Eq,Ord,Show)#}
 
 
-{- createWindow str x y w h (WindowOption p) = do
-  cstr <- newCString str
-  cwin <- c_createWindow cstr (unWinpos x) (unWinpos y) w h p
-  return (Window cwin) -}
-
-foreign import ccall unsafe "SDL2/SDL_video.h SDL_GetWindowSurface"
-  c_getWindowSurface :: Ptr CWindow -> IO (Ptr CSurface)
-
-getWindowSurface (Window ptr) = fmap Surface (c_getWindowSurface ptr)
+{#fun SDL_GetWindowSurface as getWindowSurface
+  {withWindow* `Window'} -> `Surface' mkSurface*#}
 
 {#fun unsafe SDL_CreateWindow as createWindow
  {`String',enumToC `WinPos',enumToC `WinPos',
-  `Int',`Int',flagToC `[WindowFlag]'} -> `Window' Window #} 
+  `Int',`Int',flagToC `[WindowFlag]'} ->
+   `Window' mkWindow* #} 
 
-foreign import ccall unsafe "SDL2/SDL_video.h SDL_UpdateWindowSurface"
-  c_updateWindowSurface :: Ptr CWindow -> IO CInt
-
-updateWindowSurface (Window wp) =
-  c_updateWindowSurface wp
-
-foreign import ccall unsafe "SDL2/SDL_video.h SDL_DestroyWindow"
-  c_destroyWindow :: Ptr CWindow -> IO ()
-
-destroyWindow (Window wp) = c_destroyWindow wp
+{#fun unsafe SDL_UpdateWindowSurface as updateWindowSurface
+  {withWindow* `Window'} -> `()' checkError*-#}

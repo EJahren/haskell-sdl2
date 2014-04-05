@@ -26,6 +26,10 @@ library
     Graphics.UI.SDL2.Common
   exposed-modules:
     Graphics.UI.SDL2.Error,
+    Graphics.UI.SDL2.Foreign.Window,
+    Graphics.UI.SDL2.Foreign.Renderer,
+    Graphics.UI.SDL2.Foreign.RWops,
+    Graphics.UI.SDL2.Foreign.Surface,
     Graphics.UI.SDL2.RWops,
     Graphics.UI.SDL2.Quit,
     Graphics.UI.SDL2.Rect,

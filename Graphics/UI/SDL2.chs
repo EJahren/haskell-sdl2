@@ -7,6 +7,7 @@ module Graphics.UI.SDL2(
   module Graphics.UI.SDL2.RWops,
   module Graphics.UI.SDL2.Surface,
   module Graphics.UI.SDL2.Video,
+  module Graphics.UI.SDL2.Render,
   sdlInit,
   InitOption(..)
   )where
@@ -23,6 +24,7 @@ import Graphics.UI.SDL2.Common
 {# import Graphics.UI.SDL2.RWops #}
 {# import Graphics.UI.SDL2.Surface #}
 {# import Graphics.UI.SDL2.Video #}
+{# import Graphics.UI.SDL2.Render #}
 
 #include <SDL2/SDL.h>
 {#context lib = "SDL2"#}
