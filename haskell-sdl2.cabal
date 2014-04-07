@@ -25,11 +25,12 @@ library
   other-modules: 
     Graphics.UI.SDL2.Common
   exposed-modules:
-    Graphics.UI.SDL2.Error,
-    Graphics.UI.SDL2.Foreign.Window,
-    Graphics.UI.SDL2.Foreign.Renderer,
-    Graphics.UI.SDL2.Foreign.RWops,
-    Graphics.UI.SDL2.Foreign.Surface,
+    Graphics.UI.SDL2.Internal.Error,
+    Graphics.UI.SDL2.Internal.Window,
+    Graphics.UI.SDL2.Internal.Renderer,
+    Graphics.UI.SDL2.Internal.RWops,
+    Graphics.UI.SDL2.Internal.Surface,
+    Graphics.UI.SDL2.Internal.Texture,
     Graphics.UI.SDL2.RWops,
     Graphics.UI.SDL2.Quit,
     Graphics.UI.SDL2.Rect,
@@ -43,9 +44,10 @@ library
     Graphics.UI.SDL2.Keyboard,
     Graphics.UI.SDL2.Joystick
     Graphics.UI.SDL2.Events,
-    Graphics.UI.SDL2,
-    Graphics.UI.SDL2.Test.Font
+    Graphics.UI.SDL2
+    --Graphics.UI.SDL2.Test.Font
   extra-libraries: SDL2
+  ghc-options: -Wall
   Extensions:
     CPP,
     BangPatterns,

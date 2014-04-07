@@ -1,17 +1,15 @@
+{-# LANGUAGE CPP, ForeignFunctionInterface #-}
 module Graphics.UI.SDL2.Keycode
  (module Graphics.UI.SDL2.Scancode,
   Keycode(..),
   Modifier(..)) where
-import Foreign
-import Foreign.C
 
-{# import Graphics.UI.SDL2.Scancode #}
+{#import Graphics.UI.SDL2.Scancode #}
 
 #include <SDL2/SDL_keycode.h>
-
 {#context lib = "SDL2" prefix="SDL"#}
 
-{#enum SDL_Keymod as Modifier {underscoreToCase} deriving (Eq,Ord,Show) #}
+{#enum SDL_Keymod as Modifier {underscoreToCase} deriving (Eq,Ord,Show)#}
 
 {#enum define Keycode
   {

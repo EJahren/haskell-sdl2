@@ -2,16 +2,14 @@ module Graphics.UI.SDL2.Video where
 {-# LANGUAGE CPP, BangPatterns, ForeignFunctionInterface #-}
 import Foreign
 import Foreign.C
-import Foreign.C.String
 import Foreign.C.Types
 
-import Control.Monad
 
 import Graphics.UI.SDL2.Common
 {#import Graphics.UI.SDL2.Surface #}
-{#import Graphics.UI.SDL2.Error #}
-{#import Graphics.UI.SDL2.Foreign.Window#}
-{#import Graphics.UI.SDL2.Foreign.Surface#}
+{#import Graphics.UI.SDL2.Internal.Error #}
+{#import Graphics.UI.SDL2.Internal.Window#}
+{#import Graphics.UI.SDL2.Internal.Surface#}
 
 #include <SDL2/SDL_video.h>
 {#context lib = "sdl2" prefix = "SDL" #}
@@ -34,9 +32,16 @@ import Graphics.UI.SDL2.Common
   {withWindow* `Window'} -> `Surface' mkSurface*#}
 
 {#fun unsafe SDL_CreateWindow as createWindow
- {`String',enumToC `WinPos',enumToC `WinPos',
-  `Int',`Int',flagToC `[WindowFlag]'} ->
-   `Window' mkWindow* #} 
+ {
+   `String'
+   ,enumToC `WinPos'
+   ,enumToC `WinPos'
+   ,`Int'
+   ,`Int'
+   ,flagToC `[WindowFlag]'
+ } -> `Window' mkWindow* #} 
 
 {#fun unsafe SDL_UpdateWindowSurface as updateWindowSurface
-  {withWindow* `Window'} -> `()' checkError*-#}
+  {
+    withWindow* `Window'
+  } -> `()' checkError*-#}

@@ -1,9 +1,8 @@
+{-# LANGUAGE CPP, BangPatterns, ForeignFunctionInterface #-}
 {- | Defines SDL Rectangles (Rect) and
   operations on these. -}
 module Graphics.UI.SDL2.Rect where
-{-# LANGUAGE CPP, BangPatterns, ForeignFunctionInterface #-}
 import Foreign
-import Foreign.C.String
 import Foreign.C.Types
 
 import Control.Monad

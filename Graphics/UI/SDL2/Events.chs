@@ -1,14 +1,14 @@
-module Graphics.UI.SDL2.Events where
-{-# LANGUAGE 
-  CPP,
-  BangPatterns,
-  ForeignFunctionInterface #-}
+{-# LANGUAGE CPP, ForeignFunctionInterface #-}
+{-# OPTIONS -fno-warn-missing-signatures #-}
+module Graphics.UI.SDL2.Events(
+  ButtonState,
+  KeyState,
+  Event(..),
+  pollEvent
+  )where
 import Foreign
 import Foreign.C
-import Foreign.C.String
 import Foreign.C.Types
-import Foreign.Marshal.Alloc
-import Foreign.Storable
 
 import Control.Monad
 import Data.Functor
@@ -22,7 +22,6 @@ import Graphics.UI.SDL2.Common
 {# import Graphics.UI.SDL2.Gesture #}
 
 #include <SDL2/SDL_events.h>
-
 {#context lib = "SDL2"#}
 
 {#enum define KeyState
@@ -30,11 +29,6 @@ import Graphics.UI.SDL2.Common
    SDL_RELEASED as Released} deriving (Eq,Ord,Show) #}
 
 type ButtonState = KeyState
-
-data CommonEventData = CommonEventData {
-  windowID  :: Word32} deriving(Eq,Ord,Show)
-
-data KeyEvent = KeyEvent deriving(Eq,Ord,Show)
 
 {#enum SDL_EventType as EventType
    {underscoreToCase} deriving (Eq,Ord,Show)#}
@@ -234,17 +228,12 @@ data Event =
 
 pollEvent :: IO (Maybe Event)
 pollEvent = alloca (\eventptr -> do
-  res <- c_pollEvent eventptr
+  res <- {#call SDL_PollEvent as pollEvent'_#} eventptr
   if res < 1
     then return Nothing
     else do
       event <- peek eventptr
       return (Just event))
-
-
-foreign import ccall safe "Graphics/UI/SDL2/Events.chs.h SDL_PollEvent"
-  c_pollEvent :: (EventPtr -> IO CInt)
-
 
 ---------------------------------------------------
 -- Storable instance for Event
@@ -299,6 +288,7 @@ peekFinger c p tmstmp =
     (realToFrac   <$> {#get SDL_Event.tfinger.dy#}       p) <*>
     (realToFrac   <$> {#get SDL_Event.tfinger.pressure#} p)
 
+setKeyData :: (Word32,ButtonState,Bool,Keysym) -> EventPtr -> IO ()
 setKeyData (w, s, i, (Keysym sc k m)) p = do
   {#set SDL_Event.key.windowID #} p (fromIntegral w)
   {#set SDL_Event.key.state #} p (enumToC s)
@@ -307,25 +297,31 @@ setKeyData (w, s, i, (Keysym sc k m)) p = do
   {#set SDL_Event.key.keysym.sym #} p (enumToC k)
   {#set SDL_Event.key.keysym.mod #} p (enumToC m)
 
-setMButtonEv (w,m,s,wb,x,y) p = do
+setMButtonEv ::
+  (Word32,Word32,ButtonState,Word8,Int,Int) -> EventPtr -> IO ()
+setMButtonEv (w,m,s,wb,x',y') p = do
   {#set SDL_Event.button.windowID #} p (fromIntegral w)
   {#set SDL_Event.button.which #} p (fromIntegral m)
   {#set SDL_Event.button.button #} p (fromIntegral wb)
   {#set SDL_Event.button.state #} p (enumToC s)
-  {#set SDL_Event.button.x #} p (fromIntegral x)
-  {#set SDL_Event.button.y #} p (fromIntegral y)
+  {#set SDL_Event.button.x #} p (fromIntegral x')
+  {#set SDL_Event.button.y #} p (fromIntegral y')
 
-
+setJButton :: (Word32,Word8,ButtonState) -> EventPtr -> IO ()
 setJButton (j,wb,bs) p = do
   {#set SDL_Event.jbutton.which #} p (fromIntegral j)
   {#set SDL_Event.jbutton.button #} p (fromIntegral wb)
   {#set SDL_Event.jbutton.state #} p (enumToC bs)
 
+setCButtonEv :: (Word32,Word8,ButtonState) -> EventPtr -> IO ()
 setCButtonEv (wc, wbc, c) p = do
   {#set SDL_Event.cbutton.which#} p (fromIntegral wc)
   {#set SDL_Event.cbutton.button#} p (fromIntegral wbc)
-  {#set SDL_Event.cbutton.state#} p (enumToC wbc)
+  {#set SDL_Event.cbutton.state#} p (enumToC c)
 
+setFingerEv ::
+  TouchID -> FingerID ->
+  Float -> Float -> Float -> Float -> Float -> EventPtr -> IO ()
 setFingerEv ti fi xr yr dx dy pr p = do
   {#set SDL_Event.tfinger.touchId#} p (fromIntegral ti)
   {#set SDL_Event.tfinger.fingerId#} p (fromIntegral fi)
@@ -422,7 +418,7 @@ instance Storable Event where
           (fromIntegral <$> {#get SDL_Event.caxis.value#} p)
       SdlControllerbuttondown ->
         peekContrButton ControllerButtonDown p tmstmp
-      SdlControllerbuttonup -> undefined
+      SdlControllerbuttonup ->
         peekContrButton ControllerButtonUp p tmstmp
       SdlControllerdeviceadded ->
         peekContrDevice ControllerDeviceAdded p tmstmp
@@ -460,10 +456,10 @@ instance Storable Event where
       SdlUserevent -> return (UserEvent tmstmp)
       SdlLastevent -> return (LastEvent tmstmp)
 
-  poke p x = do
-    let setType y = {#set SDL_Event.common.type #} p (enumToC y)
-    {#set SDL_Event.common.timestamp #} p (fromIntegral . timestamp $ x)
-    case x of
+  poke p ev = do
+    let setType t = {#set SDL_Event.common.type #} p (enumToC t)
+    {#set SDL_Event.common.timestamp #} p (fromIntegral . timestamp $ ev)
+    case ev of
       FirstEvent{}  ->
           setType SdlFirstevent
       Quit{}        ->
@@ -510,6 +506,7 @@ instance Storable Event where
           setType SdlTextediting
           {#set SDL_Event.edit.windowID#} p (fromIntegral w)
           {#set SDL_Event.edit.text#} p =<< newCString t
+          {#set SDL_Event.edit.start#} p (fromIntegral s)
           {#set SDL_Event.edit.length#} p (fromIntegral l)
       TextInput{
         winID = w,
@@ -527,6 +524,7 @@ instance Storable Event where
         yRel = yr} -> do
           setType SdlMousemotion
           {#set SDL_Event.motion.windowID#} p (fromIntegral w)
+          {#set SDL_Event.motion.which#} p (fromIntegral m)
           {#set SDL_Event.motion.state#} p (enumToC s)
           {#set SDL_Event.motion.x#} p (fromIntegral x')
           {#set SDL_Event.motion.y#} p (fromIntegral y')
@@ -555,13 +553,13 @@ instance Storable Event where
       MouseWheel {
         winID = w,
         mouseId = m,
-        xScrol = x,
-        yScrol = y} -> do
+        xScrol = xs,
+        yScrol = ys} -> do
           setType SdlMousewheel
           {#set SDL_Event.wheel.windowID#} p (fromIntegral w)
           {#set SDL_Event.wheel.which#} p (fromIntegral m)
-          {#set SDL_Event.wheel.x#} p (fromIntegral x)
-          {#set SDL_Event.wheel.y#} p (fromIntegral y)
+          {#set SDL_Event.wheel.x#} p (fromIntegral xs)
+          {#set SDL_Event.wheel.y#} p (fromIntegral ys)
       JoyAxisMotion {
         whichJS = j,
         axis = a,
@@ -574,21 +572,21 @@ instance Storable Event where
       JoyBallMotion{
         whichJS = j,
         ball = b,
-        xRel = x,
-        yRel = y} -> do
+        xRel = xr,
+        yRel = yr} -> do
           setType SdlJoyaxismotion
           {#set SDL_Event.jball.which#} p (fromIntegral j)
           {#set SDL_Event.jball.ball#} p (fromIntegral b)
-          {#set SDL_Event.jball.xrel#} p (fromIntegral x)
-          {#set SDL_Event.jball.yrel#} p (fromIntegral y)
+          {#set SDL_Event.jball.xrel#} p (fromIntegral xr)
+          {#set SDL_Event.jball.yrel#} p (fromIntegral yr)
       JoyHatMotion{
         whichJS = j,
         hat = h,
-        pos = x} -> do
+        pos = xr} -> do
           setType SdlJoyhatmotion
           {#set SDL_Event.jhat.which#} p (fromIntegral j)
           {#set SDL_Event.jhat.hat#} p (fromIntegral h)
-          {#set SDL_Event.jhat.value#} p (enumToC x)
+          {#set SDL_Event.jhat.value#} p (enumToC xr)
       JoyButtonDown{
         whichJS = j,      
         whichButtonJS = wb, 
@@ -692,7 +690,7 @@ instance Storable Event where
           {#set SDL_Event.dgesture.x#} p
             (realToFrac xc)
           {#set SDL_Event.dgesture.y#} p
-            (realToFrac xc)
+            (realToFrac yc)
       DollarRecord{} ->
          setType SdlDollarrecord
       MultiGesture{

@@ -4,13 +4,13 @@ module Graphics.UI.SDL2.RWops(
  rwFromFile) where
 import Foreign
 import Foreign.C
-import Foreign.C.String
 import Foreign.C.Types
 
-import Control.Monad
-
 #include <SDL2/SDL_rwops.h>
-{#import Graphics.UI.SDL2.Foreign.RWops#}
+{#import Graphics.UI.SDL2.Internal.RWops#}
 
 {#fun SDL_RWFromFile as rwFromFile
-  {`String', `String'} -> `RWops' mkRWops* #}
+  {
+    `String',
+    `String'
+  } -> `RWops' mkRWops* #}

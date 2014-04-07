@@ -2,19 +2,20 @@
 module Graphics.UI.SDL2.Common where
 
 import Foreign
-import Foreign.C
-import Foreign.C.Types
 
 import Data.List
-import Data.Bits
 
+enumToC :: (Enum a, Num c) => a -> c
 enumToC = fromIntegral . fromEnum
+enumFromC :: (Enum a, Integral c) => c -> a
 enumFromC = toEnum . fromIntegral
 
+flagToC :: (Enum a,Bits b, Num b) => [a] -> b
 flagToC = foldl' (.|.) 0 . map enumToC
 
-checkErrorCode msg x
-  | x == 0 = ()
-  | otherwise = error msg
-
+withPtr :: (Storable a) => a -> (Ptr a -> IO b) -> IO b
 withPtr x f = alloca (\p -> poke p x >> f p)
+
+withMayPtr :: (Storable a) => Maybe a -> (Ptr a -> IO b) -> IO b
+withMayPtr (Just x) f = withPtr x f
+withMayPtr Nothing f = f nullPtr 

@@ -11,6 +11,9 @@ module Main where
 import System.Exit (exitFailure)
 
 import Interactive.SdlLogo
+import qualified Interactive.SdlLogoRenderer as R
 
-main = showLogo "Tests/Interactive/sdl_logo.bmp"
+main = do 
+  showLogo "Tests/Interactive/sdl_logo.bmp"
+  R.showLogo "Tests/Interactive/sdl_logo.bmp"
 

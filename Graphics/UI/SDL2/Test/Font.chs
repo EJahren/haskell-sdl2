@@ -11,12 +11,15 @@ import Foreign.C
 import Foreign.C.String
 import Foreign.C.Types
 
+
+
+{# import Graphics.UI.SDL2.Internal.Error#}
 {# import Graphics.UI.SDL2.Render #}
-{# import Graphics.UI.SDL2.Foreign.Renderer#}
-{# import Graphics.UI.SDL2.Error #}
+{# import Graphics.UI.SDL2.Internal.Renderer#}
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_test_font.h>
+{#context lib = "SDL2_test"#}
 
 
 -- | Draw a string in the currently set font.
@@ -27,7 +30,6 @@ import Foreign.C.Types
 -- >  -> Int   -- ^ The Y coordinate of the upper left corner of the String.
 -- >  -> String -- ^ The string to draw.
 -- >  -> IO ()
--- 
 {#fun unsafe SDLTest_DrawString as drawString
  {withRenderer* `Renderer', `Int', `Int', `String'} 
   -> `()' checkError*-#} 

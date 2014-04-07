@@ -1,7 +1,5 @@
-
+{-# LANGUAGE CPP, ForeignFunctionInterface #-}
 module Graphics.UI.SDL2.Scancode where
-import Foreign
-import Foreign.C
 
 #include <SDL2/SDL_scancode.h>
 
