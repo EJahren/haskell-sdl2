@@ -3,6 +3,7 @@
 module Graphics.UI.SDL2.Internal.Renderer(
   Renderer,
   mkRenderer,
+  mkUnhandledRenderer,
   withRenderer,
   peekRenderer) where
 import Foreign
@@ -21,6 +22,9 @@ foreign import ccall "SDL2/SDL_render.h &SDL_DestroyRenderer"
 
 mkRenderer :: Ptr Renderer -> IO Renderer
 mkRenderer p = liftM Renderer . newForeignPtr destroyRenderer =<< checkNull p
+
+mkUnhandledRenderer :: Ptr Renderer -> IO Renderer
+mkUnhandledRenderer p = liftM Renderer . newForeignPtr_ =<< checkNull p
 
 peekRenderer :: Ptr (Ptr Renderer) -> IO Renderer
 peekRenderer p = mkRenderer =<< peekWCheck p

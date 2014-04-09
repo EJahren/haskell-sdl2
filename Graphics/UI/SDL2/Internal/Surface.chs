@@ -3,6 +3,7 @@
 module Graphics.UI.SDL2.Internal.Surface(
  Surface,
  mkSurface,
+ mkUnhandledSurface,
  withSurface,
  peekSurface) where
 import Foreign
@@ -21,6 +22,9 @@ foreign import ccall "SDL2/SDL_surface.h &SDL_FreeSurface"
 
 mkSurface :: Ptr Surface -> IO Surface
 mkSurface p = liftM Surface . newForeignPtr freeSurface =<< checkNull p
+
+mkUnhandledSurface :: Ptr Surface -> IO Surface
+mkUnhandledSurface p = liftM Surface . newForeignPtr_ =<< checkNull p
 
 peekSurface :: Ptr (Ptr Surface) -> IO Surface
 peekSurface p = mkSurface =<< peekWCheck p

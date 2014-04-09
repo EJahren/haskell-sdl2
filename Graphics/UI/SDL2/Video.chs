@@ -29,7 +29,7 @@ import Graphics.UI.SDL2.Common
 
 
 {#fun SDL_GetWindowSurface as getWindowSurface
-  {withWindow* `Window'} -> `Surface' mkSurface*#}
+  {withWindow* `Window'} -> `Surface' mkUnhandledSurface*#}
 
 {#fun unsafe SDL_CreateWindow as createWindow
  {

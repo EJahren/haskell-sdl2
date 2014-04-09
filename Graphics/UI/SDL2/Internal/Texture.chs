@@ -3,6 +3,7 @@
 module Graphics.UI.SDL2.Internal.Texture(
   Texture,
   mkTexture,
+  mkUnhandledTexture,
   peekTexture,
   withTexture) where
 import Foreign
@@ -22,6 +23,9 @@ foreign import ccall "SDL2/SDL_render.h &SDL_DestroyTexture"
 
 mkTexture :: Ptr Texture -> IO Texture
 mkTexture p = liftM Texture . newForeignPtr destroyTexture =<< checkNull p
+
+mkUnhandledTexture :: Ptr Texture -> IO Texture
+mkUnhandledTexture p = liftM Texture . newForeignPtr_ =<< checkNull p
 
 peekTexture :: Ptr (Ptr Texture) -> IO Texture
 peekTexture p = mkTexture =<< peekWCheck p

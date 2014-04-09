@@ -3,6 +3,7 @@
 module Graphics.UI.SDL2.Internal.RWops(
   RWops,
   mkRWops,
+  mkUnhandledRWops,
   peekRWops,
   withRWops) where
 import Foreign
@@ -21,6 +22,9 @@ foreign import ccall "SDL2/SDL_rwops.h &SDL_FreeRW"
 
 mkRWops :: Ptr RWops -> IO RWops
 mkRWops p = liftM RWops . newForeignPtr freeRWops =<< checkNull p
+
+mkUnhandledRWops :: Ptr RWops -> IO RWops
+mkUnhandledRWops p = liftM RWops . newForeignPtr_ =<< checkNull p
 
 peekRWops :: Ptr (Ptr RWops) -> IO RWops
 peekRWops p = mkRWops =<< peekWCheck p
