@@ -12,7 +12,7 @@ import Graphics.UI.SDL2.Common
 {#import Graphics.UI.SDL2.Internal.Surface#}
 
 #include <SDL2/SDL_video.h>
-{#context lib = "sdl2" prefix = "SDL" #}
+{#context lib = "SDL2" prefix = "SDL" #}
 
 {#enum SDL_WindowFlags as WindowFlag
    {underscoreToCase} deriving (Show,Eq,Ord)#}

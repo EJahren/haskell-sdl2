@@ -21,29 +21,30 @@ of the many good 3D engines.
 These functions must be called from the main thread.
 See this bug for details: http://bugzilla.libsdl.org/show_bug.cgi?id=1995
 -}
-
 module Graphics.UI.SDL2.Render(
  Renderer,
  createWindowAndRenderer,
  renderCopy,
  renderPresent,
  createTextureFromSurface,
- setRenderTarget
+ setRenderTarget,
+ setRenderDrawColor,
+ renderDrawLine
  ) where
 import Foreign
 import Foreign.C.Types
 
 import Graphics.UI.SDL2.Common
-{# import Graphics.UI.SDL2.Internal.Error #}
-{# import Graphics.UI.SDL2.Video#}
-{# import Graphics.UI.SDL2.Rect #}
-{# import Graphics.UI.SDL2.Internal.Window#}
-{# import Graphics.UI.SDL2.Internal.Renderer#}
-{# import Graphics.UI.SDL2.Internal.Texture#}
-{# import Graphics.UI.SDL2.Internal.Surface#}
+{#import Graphics.UI.SDL2.Internal.Error #}
+{#import Graphics.UI.SDL2.Video#}
+{#import Graphics.UI.SDL2.Rect#}
+{#import Graphics.UI.SDL2.Internal.Window#}
+{#import Graphics.UI.SDL2.Internal.Renderer#}
+{#import Graphics.UI.SDL2.Internal.Texture#}
+{#import Graphics.UI.SDL2.Internal.Surface#}
 #include <SDL2/SDL_render.h>
 
-{#context lib = "sdl2" prefix = "SDL"#}
+{#context lib = "SDL2" prefix = "SDL"#}
 
 -- | Flags used when creating a rendering context
 {#enum RendererFlags
@@ -91,15 +92,15 @@ deriving (Eq,Ord,Show)#}
 -- >  IO (Window,Renderer) 
 {#fun unsafe CreateWindowAndRenderer as createWindowAndRenderer
   {
-  `Int'
-  ,`Int'
-  ,flagToC `[WindowFlag]'
-  ,alloca- `Window' peekWindow*
-  ,alloca- `Renderer' peekRenderer*
+   `Int'
+   ,`Int'
+   ,flagToC `[WindowFlag]'
+   ,alloca- `Window' peekWindow*
+   ,alloca- `Renderer' peekRenderer*
   } -> `()' checkError*-#} 
 
 -- | Destroy the rendering context for a window and free associated textures.
-{#fun CreateTextureFromSurface as createTextureFromSurface
+{#fun unsafe CreateTextureFromSurface as createTextureFromSurface
   {
    withRenderer* `Renderer'
    ,withSurface* `Surface'
@@ -145,3 +146,48 @@ deriving (Eq,Ord,Show)#}
   {
     withRenderer* `Renderer'
   } -> `()'id#}
+
+{- | Draw a line on the current rendering target.
+  >renderDrawLine ::
+  >  Renderer -> -- ^ The renderer which should draw a line.
+  >  Int      -> -- ^The x coordinate of the start point.
+  >  Int      -> -- ^The y coordinate of the start point.
+  >  Int      -> -- ^The x coordinate of the end point.
+  >  Int      -> -- ^The y coordinate of the end point.
+  >  IO ()
+-}
+{#fun RenderDrawLine as renderDrawLine
+  {
+   withRenderer* `Renderer'
+   ,`Int'
+   ,`Int'
+   ,`Int'
+   ,`Int'
+  } -> `()' checkError*-#}
+
+{- | 
+Set the color used for drawing operations (Rect, Line and Clear).
+ >setRenderDrawColor ::
+ >  Renderer -> -- ^
+ >  Word8 -> -- ^  The red value used to draw on the rendering target.
+ >  Word8 -> -- ^  The green value used to draw on the rendering target.
+ >  Word8 -> -- ^  The blue value used to draw on the rendering target.
+ >  Word8 -> -- ^  The alpha value used to draw on the rendering target, usually 255.
+ >  IO ()
+
+renderer The renderer for which drawing color should be set.
+r
+g The green value used to draw on the rendering target.
+b The blue value used to draw on the rendering target.
+a The alpha value used to draw on the rendering target, usually
+  ::SDL_ALPHA_OPAQUE (255).
+-}
+{#fun SetRenderDrawColor as setRenderDrawColor
+  {
+   withRenderer* `Renderer'
+   ,`Word8'
+   ,`Word8'
+   ,`Word8'
+   ,`Word8'
+  } -> `()' checkError*-#}
+    
