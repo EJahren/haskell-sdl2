@@ -44,4 +44,4 @@ import Graphics.UI.SDL2.Common
 {#fun unsafe SDL_UpdateWindowSurface as updateWindowSurface
   {
     withWindow* `Window'
-  } -> `()' checkError*-#}
+  } -> `() ' checkError*-#}

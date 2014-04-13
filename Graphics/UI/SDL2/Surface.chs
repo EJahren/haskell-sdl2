@@ -36,4 +36,4 @@ loadBmp file = do
  {withSurface* `Surface', 
   withMayPtr* `Maybe Rect',
   withSurface* `Surface',
-  withMayPtr* `Maybe Rect'} -> `()' checkError*- #}
+  withMayPtr* `Maybe Rect'} -> `() ' checkError*- #}

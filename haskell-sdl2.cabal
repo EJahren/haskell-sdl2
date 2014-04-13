@@ -20,6 +20,12 @@ Test-Suite interactive
   build-depends: base, haskell-sdl2
   hs-source-dirs: Tests
 
+Test-Suite automatic
+  type: exitcode-stdio-1.0
+  main-is: Automatic.hs
+  build-depends: base, haskell-sdl2
+  hs-source-dirs: Tests
+
 library
   Build-Tools: c2hs
   other-modules: 
@@ -27,10 +33,11 @@ library
   exposed-modules:
     Graphics.UI.SDL2.Internal.Error,
     Graphics.UI.SDL2.Internal.Window,
+    Graphics.UI.SDL2.Internal.Texture,
     Graphics.UI.SDL2.Internal.Renderer,
     Graphics.UI.SDL2.Internal.RWops,
     Graphics.UI.SDL2.Internal.Surface,
-    Graphics.UI.SDL2.Internal.Texture,
+    Graphics.UI.SDL2.Pixels,
     Graphics.UI.SDL2.RWops,
     Graphics.UI.SDL2.Quit,
     Graphics.UI.SDL2.Rect,
@@ -45,11 +52,10 @@ library
     Graphics.UI.SDL2.Joystick
     Graphics.UI.SDL2.Events,
     Graphics.UI.SDL2
-    --Graphics.UI.SDL2.Test.Font
   extra-libraries: SDL2
   ghc-options: -Wall
   Extensions:
     CPP,
     BangPatterns,
     ForeignFunctionInterface
-  build-depends:       base ==4.6.*
+  build-depends:       base == 4.6.*

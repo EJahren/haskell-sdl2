@@ -6,6 +6,7 @@ module Graphics.UI.SDL2(
   module Graphics.UI.SDL2.Surface,
   module Graphics.UI.SDL2.Video,
   module Graphics.UI.SDL2.Render,
+  module Graphics.UI.SDL2.Pixels,
   sdlInit,
   sdlQuit,
   InitOption(..)
@@ -21,6 +22,7 @@ import Graphics.UI.SDL2.Common
 {# import Graphics.UI.SDL2.Surface #}
 {# import Graphics.UI.SDL2.Video #}
 {# import Graphics.UI.SDL2.Render #}
+{# import Graphics.UI.SDL2.Pixels #}
 {# import Graphics.UI.SDL2.Internal.Error #}
 
 #include <SDL2/SDL.h>
@@ -41,7 +43,7 @@ import Graphics.UI.SDL2.Common
   } deriving (Eq,Ord,Show) #}
 
 {#fun unsafe SDL_Init as sdlInit
-  {flagToC `[InitOption]'} -> `()' checkError*-#}
+  {flagToC `[InitOption]'} -> `() ' checkError*-#}
 
 sdlQuit :: IO ()
 sdlQuit = do

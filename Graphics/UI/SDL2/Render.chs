@@ -23,12 +23,17 @@ See this bug for details: http://bugzilla.libsdl.org/show_bug.cgi?id=1995
 -}
 module Graphics.UI.SDL2.Render(
  Renderer,
+ TextureAccess(..),
+ RendererFlags(..),
+ TextureModulate(..),
  createWindowAndRenderer,
  renderCopy,
  renderPresent,
  createTextureFromSurface,
  setRenderTarget,
+ getRenderTarget,
  setRenderDrawColor,
+ createTexture,
  renderDrawLine
  ) where
 import Foreign
@@ -38,6 +43,7 @@ import Graphics.UI.SDL2.Common
 {#import Graphics.UI.SDL2.Internal.Error #}
 {#import Graphics.UI.SDL2.Video#}
 {#import Graphics.UI.SDL2.Rect#}
+{#import Graphics.UI.SDL2.Pixels#}
 {#import Graphics.UI.SDL2.Internal.Window#}
 {#import Graphics.UI.SDL2.Internal.Renderer#}
 {#import Graphics.UI.SDL2.Internal.Texture#}
@@ -97,7 +103,7 @@ deriving (Eq,Ord,Show)#}
    ,flagToC `[WindowFlag]'
    ,alloca- `Window' peekWindow*
    ,alloca- `Renderer' peekRenderer*
-  } -> `()' checkError*-#} 
+  } -> `() ' checkError*-#} 
 
 -- | Destroy the rendering context for a window and free associated textures.
 {#fun unsafe CreateTextureFromSurface as createTextureFromSurface
@@ -106,20 +112,6 @@ deriving (Eq,Ord,Show)#}
    ,withSurface* `Surface'
   } -> `Texture' mkTexture*#}
 
-{- | Set a texture as the current rendering target.
-
- >setRenderTarget ::
- >  Renderer -> -- ^ The renderer.
- >  Texture  -> -- ^ The targeted texture, which must be
- >              -- created with the TextureAccessTarget flag, or NULL
- >              -- for the default render target
- >  IO ()
--}
-{#fun SetRenderTarget as setRenderTarget
-  {
-   withRenderer* `Renderer'
-   ,withTexture*  `Texture'
-  } -> `()' checkError*-#}
 
 
 
@@ -140,12 +132,12 @@ deriving (Eq,Ord,Show)#}
     ,withTexture* `Texture'
     ,withMayPtr*  `Maybe Rect'
     ,withMayPtr*  `Maybe Rect'
-  } -> `()' checkError*-#}
+  } -> `() ' checkError*-#}
 
 {#fun RenderPresent as renderPresent
   {
     withRenderer* `Renderer'
-  } -> `()'id#}
+  } -> `()'#}
 
 {- | Draw a line on the current rendering target.
   >renderDrawLine ::
@@ -163,7 +155,7 @@ deriving (Eq,Ord,Show)#}
    ,`Int'
    ,`Int'
    ,`Int'
-  } -> `()' checkError*-#}
+  } -> `() ' checkError*-#}
 
 {- | 
 Set the color used for drawing operations (Rect, Line and Clear).
@@ -189,5 +181,24 @@ a The alpha value used to draw on the rendering target, usually
    ,`Word8'
    ,`Word8'
    ,`Word8'
-  } -> `()' checkError*-#}
-    
+  } -> `() ' checkError*-#}
+
+
+{- | Create a texture for a rendering context.
+
+ >createTexture :: 
+ >  Renderer        -> -- ^ The renderer.
+ >  PixelFormatType -> -- ^ The format of the texture.
+ >  TextureAccess   -> -- ^ One of the enumerated values in ::SDL_TextureAccess.
+ >  Int             -> -- ^ The width of the texture in pixels.
+ >  Int             -> -- ^ The height of the texture in pixels.
+ >  IO Texture 
+-}
+{#fun CreateTexture as createTexture
+  {
+   withRenderer* `Renderer',
+   enumToC `PixelFormatType',
+   enumToC `TextureAccess',
+   `Int',
+   `Int'
+   } -> `Texture' mkTexture* #}
