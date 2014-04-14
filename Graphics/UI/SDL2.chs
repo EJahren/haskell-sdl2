@@ -7,8 +7,7 @@ module Graphics.UI.SDL2(
   module Graphics.UI.SDL2.Video,
   module Graphics.UI.SDL2.Render,
   module Graphics.UI.SDL2.Pixels,
-  sdlInit,
-  sdlQuit,
+  withSdl,
   InitOption(..)
   )where
 import Foreign.C
@@ -28,7 +27,10 @@ import Graphics.UI.SDL2.Common
 #include <SDL2/SDL.h>
 {#context lib = "SDL2"#}
 
-
+{- |
+These are the flags which may be passed to withSdl. You should
+specify the subsystems which you will be using in your application.
+-}
 {#enum define InitOption
   {
     SDL_INIT_TIMER          as InitTimer
@@ -42,11 +44,20 @@ import Graphics.UI.SDL2.Common
   , SDL_INIT_EVERYTHING     as InitEverything
   } deriving (Eq,Ord,Show) #}
 
-{#fun unsafe SDL_Init as sdlInit
-  {flagToC `[InitOption]'} -> `() ' checkError*-#}
-
-sdlQuit :: IO ()
-sdlQuit = do
+{- | Run an IO action containing sdl calls. Note that
+  any call to SDL functions must be enclosed in one withSdl
+  call -}
+{- In the future we might want to make the type of this function
+  ::   [InitOption] -> SDL a -> IO a, as to make the dependence 
+  explicit in the types, but that yields relatively low gain for quite
+  a lot of effort. -}
+withSdl :: [InitOption] -> IO a -> IO a
+withSdl ops f = do
+  sdlInit ops
+  a <- f
   performGC 
   {#call SDL_Quit as sdlQuit'_#}
+  return a
 
+{#fun unsafe SDL_Init as sdlInit
+  {flagToC `[InitOption]'} -> `() ' checkError*-#}

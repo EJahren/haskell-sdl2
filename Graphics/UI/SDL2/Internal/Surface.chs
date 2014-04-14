@@ -4,7 +4,7 @@ module Graphics.UI.SDL2.Internal.Surface(
  Surface,
  mkSurface,
  mkUnhandledSurface,
- withSurface,
+ withSurfacePtr,
  peekSurface) where
 import Foreign
 
@@ -19,6 +19,8 @@ import Control.Monad
 
 foreign import ccall "SDL2/SDL_surface.h &SDL_FreeSurface"
   freeSurface :: FunPtr(Ptr Surface -> IO())
+
+withSurfacePtr = withSurface
 
 mkSurface :: Ptr Surface -> IO Surface
 mkSurface p = liftM Surface . newForeignPtr freeSurface =<< checkNull p

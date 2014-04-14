@@ -24,9 +24,9 @@ See this bug for details: http://bugzilla.libsdl.org/show_bug.cgi?id=1995
 module Graphics.UI.SDL2.Render(
  Renderer,
  TextureAccess(..),
- RendererFlags(..),
+ RendererFlag(..),
  TextureModulate(..),
- createWindowAndRenderer,
+ withWindowAndRenderer,
  renderCopy,
  renderPresent,
  createTextureFromSurface,
@@ -52,15 +52,6 @@ import Graphics.UI.SDL2.Common
 
 {#context lib = "SDL2" prefix = "SDL"#}
 
--- | Flags used when creating a rendering context
-{#enum RendererFlags
-   {
-    RENDERER_SOFTWARE as RendererSoftware -- | The renderer is a software fallback.
-    ,RENDERER_ACCELERATED as RendererAccelerated -- | The renderer uses hardware acceleration.
-    ,RENDERER_PRESENTVSYNC as RendererPresentVSync -- | Present is synchronized with the refresh rate.
-    ,RENDERER_TARGETTEXTURE as RendererTargetTexture -- | The renderer supports rendering to texture.
-   } 
-deriving (Eq,Ord,Show)#}
 
 -- | The access pattern allowed for a texture.
 {#enum TextureAccess
@@ -89,6 +80,27 @@ deriving (Eq,Ord,Show)#}
     }
 deriving (Eq,Ord,Show)#}
 
+withWindowAndRenderer ::
+  String -> -- ^ The title of the window.
+  WinPos -> -- ^ The x position of the window.
+  WinPos -> -- ^ The y position of the window.
+  Int    -> -- ^ The width of the window.
+  Int    -> -- ^ The height of the window.
+  [WindowFlag] -> -- ^ The flags for the window.
+  Int    -> -- ^ The index of the rendering drice to initiate,
+            --     -1 to initialize the first one supporting
+            --     the requested flags.
+  [RendererFlag] ->
+  ((Window,Renderer) -> IO a) -> -- ^ The action to run with the window and the Renderer.
+  IO a
+withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
+  win <- createWindow str p1 p2 w h wfs
+  rend <- createRenderer win rfs i
+  a <- f (win,rend)
+  withRendererPtr rend {#call DestroyRenderer as destroyRenderer'_#}
+  withWindowPtr win {#call DestroyWindow as destroyWindow'_#}
+  return a
+
 
 -- | Create a window and default renderer
 -- >createWindowAndRenderer ::
@@ -108,8 +120,8 @@ deriving (Eq,Ord,Show)#}
 -- | Destroy the rendering context for a window and free associated textures.
 {#fun unsafe CreateTextureFromSurface as createTextureFromSurface
   {
-   withRenderer* `Renderer'
-   ,withSurface* `Surface'
+   withRendererPtr* `Renderer'
+   ,withSurfacePtr* `Surface'
   } -> `Texture' mkTexture*#}
 
 
@@ -128,15 +140,15 @@ deriving (Eq,Ord,Show)#}
 -}
 {#fun RenderCopy as renderCopy
   {
-    withRenderer* `Renderer'
-    ,withTexture* `Texture'
+    withRendererPtr* `Renderer'
+    ,withTexturePtr* `Texture'
     ,withMayPtr*  `Maybe Rect'
     ,withMayPtr*  `Maybe Rect'
   } -> `() ' checkError*-#}
 
 {#fun RenderPresent as renderPresent
   {
-    withRenderer* `Renderer'
+    withRendererPtr* `Renderer'
   } -> `()'#}
 
 {- | Draw a line on the current rendering target.
@@ -150,7 +162,7 @@ deriving (Eq,Ord,Show)#}
 -}
 {#fun RenderDrawLine as renderDrawLine
   {
-   withRenderer* `Renderer'
+   withRendererPtr* `Renderer'
    ,`Int'
    ,`Int'
    ,`Int'
@@ -176,7 +188,7 @@ a The alpha value used to draw on the rendering target, usually
 -}
 {#fun SetRenderDrawColor as setRenderDrawColor
   {
-   withRenderer* `Renderer'
+   withRendererPtr* `Renderer'
    ,`Word8'
    ,`Word8'
    ,`Word8'
@@ -196,7 +208,7 @@ a The alpha value used to draw on the rendering target, usually
 -}
 {#fun CreateTexture as createTexture
   {
-   withRenderer* `Renderer',
+   withRendererPtr* `Renderer',
    enumToC `PixelFormatType',
    enumToC `TextureAccess',
    `Int',

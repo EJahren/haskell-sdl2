@@ -1,11 +1,17 @@
-module Graphics.UI.SDL2.Video where
 {-# LANGUAGE CPP, BangPatterns, ForeignFunctionInterface #-}
+module Graphics.UI.SDL2.Video(
+  withWindow,
+  WindowFlag(..),
+  WindowEventID(..),
+  WinPos(..),
+  getWindowSurface,
+  updateWindowSurface,
+) where
 import Foreign
 import Foreign.C
 import Foreign.C.Types
 
 
-import Graphics.UI.SDL2.Common
 {#import Graphics.UI.SDL2.Surface #}
 {#import Graphics.UI.SDL2.Internal.Error #}
 {#import Graphics.UI.SDL2.Internal.Window#}
@@ -14,34 +20,32 @@ import Graphics.UI.SDL2.Common
 #include <SDL2/SDL_video.h>
 {#context lib = "SDL2" prefix = "SDL" #}
 
-{#enum SDL_WindowFlags as WindowFlag
-   {underscoreToCase} deriving (Show,Eq,Ord)#}
 
 {#enum SDL_WindowEventID as WindowEventID
    {underscoreToCase} deriving (Show,Eq,Ord)#}
 
-{#enum define WinPos
-  {
-   SDL_WINDOWPOS_CENTERED as WinPosCentered
-  ,SDL_WINDOWPOS_UNDEFINED as WinPosUndefined
-  } 
-  deriving (Eq,Ord,Show)#}
-
-
 {#fun SDL_GetWindowSurface as getWindowSurface
-  {withWindow* `Window'} -> `Surface' mkUnhandledSurface*#}
+  {withWindowPtr* `Window'} -> `Surface' mkUnhandledSurface*#}
 
-{#fun unsafe SDL_CreateWindow as createWindow
- {
-   `String'
-   ,enumToC `WinPos'
-   ,enumToC `WinPos'
-   ,`Int'
-   ,`Int'
-   ,flagToC `[WindowFlag]'
- } -> `Window' mkWindow* #} 
+{- | Run an IO action on a window -}
+withWindow ::
+  String -> -- ^ The title of the window.
+  WinPos -> -- ^ The x position of the window.
+  WinPos -> -- ^ The y position of the window.
+  Int    -> -- ^ The width of the window.
+  Int    -> -- ^ The height of the window.
+  [WindowFlag] -> -- ^ The flags for the window.
+  (Window -> IO a) -> -- ^ The action to run with the window.
+  IO a
 
+withWindow s p1 p2 w h fs f = do
+  win <- createWindow s p1 p2 w h fs
+  a <- f win
+  withWindowPtr win {#call SDL_DestroyWindow as destroyWindow'_#}
+  return a
+  
+{- | Copy the window surface to the screen. -}
 {#fun unsafe SDL_UpdateWindowSurface as updateWindowSurface
   {
-    withWindow* `Window'
+    withWindowPtr* `Window'
   } -> `() ' checkError*-#}

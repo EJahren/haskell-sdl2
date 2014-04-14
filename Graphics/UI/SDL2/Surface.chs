@@ -22,7 +22,7 @@ import Graphics.UI.SDL2.Common
 
 {#fun SDL_LoadBMP_RW as loadBmpRw
   {
-   withRWops* `RWops',
+   withRWopsPtr* `RWops',
    `Int'
   }
  -> `Surface' mkSurface* #}
@@ -33,7 +33,7 @@ loadBmp file = do
   loadBmpRw rw 0
 
 {#fun SDL_UpperBlit as upperBlit
- {withSurface* `Surface', 
+ {withSurfacePtr* `Surface', 
   withMayPtr* `Maybe Rect',
-  withSurface* `Surface',
+  withSurfacePtr* `Surface',
   withMayPtr* `Maybe Rect'} -> `() ' checkError*- #}

@@ -2,11 +2,12 @@
 {-# OPTIONS -fno-warn-missing-signatures #-}
 module Graphics.UI.SDL2.Internal.Renderer(
   Renderer,
+  RendererFlag(..),
   mkRenderer,
-  mkUnhandledRenderer,
   setRenderTarget,
   getRenderTarget,
-  withRenderer,
+  withRendererPtr,
+  createRenderer,
   peekRenderer) where
 import Foreign
 import Foreign.C
@@ -14,21 +15,33 @@ import Foreign.C
 import Control.Monad
 import Data.IORef
 
+import Graphics.UI.SDL2.Common
 {#import Graphics.UI.SDL2.Internal.Error#}
 {#import Graphics.UI.SDL2.Internal.Texture#}
+{#import Graphics.UI.SDL2.Internal.Window#}
 
 #include <SDL2/SDL_render.h>
 {#context lib = "SDL2"#}
 
+-- | Flags used when creating a rendering context
+{#enum SDL_RendererFlags as RendererFlag
+   {
+    SDL_RENDERER_SOFTWARE as RendererSoftware -- | The renderer is a software fallback.
+    ,SDL_RENDERER_ACCELERATED as RendererAccelerated -- | The renderer uses hardware acceleration.
+    ,SDL_RENDERER_PRESENTVSYNC as RendererPresentVSync -- | Present is synchronized with the refresh rate.
+    ,SDL_RENDERER_TARGETTEXTURE as RendererTargetTexture -- | The renderer supports rendering to texture.
+   } 
+deriving (Eq,Ord,Show)#}
+
 data Renderer = Renderer{
-  renderPtr :: ForeignPtr Renderer,
+  renderPtr :: Ptr Renderer,
   renderTarget :: IORef (Maybe Texture)
 } deriving (Eq)
 {#pointer *SDL_Renderer as Renderer foreign newtype nocode#}
 
-withRenderer :: Renderer -> (Ptr Renderer -> IO a) -> IO a
-withRenderer Renderer{renderPtr = p} f =
-  withForeignPtr p f
+withRendererPtr :: Renderer -> (Ptr Renderer -> IO a) -> IO a
+withRendererPtr Renderer{renderPtr = p} f =
+  f p
 
 foreign import ccall "SDL2/SDL_render.h &SDL_DestroyRenderer"
   destroyRenderer :: FunPtr(Ptr Renderer -> IO())
@@ -36,12 +49,7 @@ foreign import ccall "SDL2/SDL_render.h &SDL_DestroyRenderer"
 mkRenderer :: Ptr Renderer -> IO Renderer
 mkRenderer p = do
   t <- newIORef Nothing
-  liftM (\x -> Renderer x t) . newForeignPtr destroyRenderer =<< checkNull p
-
-mkUnhandledRenderer :: Ptr Renderer -> IO Renderer
-mkUnhandledRenderer p = do 
-  t <- newIORef Nothing
-  liftM (\x -> Renderer x t) . newForeignPtr_ =<< checkNull p
+  liftM (\x -> Renderer x t) (checkNull p)
 
 peekRenderer :: Ptr (Ptr Renderer) -> IO Renderer
 peekRenderer p = mkRenderer =<< peekWCheck p
@@ -59,8 +67,8 @@ setRenderTarget r t = do
 
 {#fun SDL_SetRenderTarget as c_setRenderTarget
   {
-   withRenderer* `Renderer'
-   ,withTexture*  `Texture'
+   withRendererPtr* `Renderer'
+   ,withTexturePtr*  `Texture'
   } -> `() ' checkError*#}
 
 {- | Get the current render target or NULL for the default render target. -}
@@ -73,6 +81,12 @@ getRenderTarget r = do
 
 {#fun SDL_GetRenderTarget as c_getRenderTarget
   {
-   withRenderer* `Renderer'
+   withRendererPtr* `Renderer'
   } -> `Texture' mkTexture*#}
 
+{#fun SDL_CreateRenderer as createRenderer
+  {
+    withWindowPtr* `Window'
+    ,`Int'
+    ,flagToC `[RendererFlag]'
+  } -> `Renderer' mkRenderer* #}

@@ -2,16 +2,21 @@
 module Graphics.UI.SDL2.Internal.Window
   (Window,
   mkWindow,
-  withWindow,
+  withWindowPtr,
+  createWindow,
+  WinPos(..),
+  WindowFlag(..),
   peekWindow) where
 import Foreign
+import Foreign.C
 
+import Graphics.UI.SDL2.Common
 {#import Graphics.UI.SDL2.Internal.Error#}
 
 #include <SDL2/SDL_video.h>
-{#context lib = "sdl2"#}
+{#context lib = "sdl2" prefix = "SDL"#}
 
-{#pointer *SDL_Window as Window#}
+{#pointer *Window as Window#}
 
 mkWindow :: Ptr () -> IO Window
 mkWindow p = checkNull p
@@ -19,5 +24,25 @@ mkWindow p = checkNull p
 peekWindow :: Ptr (Ptr ()) -> IO Window
 peekWindow p = mkWindow =<< peekWCheck p
 
-withWindow :: Window -> (Ptr () -> IO b) -> IO b
-withWindow p f =  f p
+withWindowPtr :: Window -> (Ptr () -> IO b) -> IO b
+withWindowPtr p f =  f p
+
+{#enum WindowFlags as WindowFlag
+   {underscoreToCase} deriving (Show,Eq,Ord)#}
+
+{#enum define WinPos
+  {
+   SDL_WINDOWPOS_CENTERED as WinPosCentered
+  ,SDL_WINDOWPOS_UNDEFINED as WinPosUndefined
+  } 
+  deriving (Eq,Ord,Show)#}
+
+{#fun unsafe CreateWindow as createWindow
+ {
+   `String'
+   ,enumToC `WinPos'
+   ,enumToC `WinPos'
+   ,`Int'
+   ,`Int'
+   ,flagToC `[WindowFlag]'
+ } -> `Window' mkWindow* #} 

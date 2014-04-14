@@ -7,7 +7,7 @@ windowHeight = 240
 windowTitle = "SDL2 Test"
 
 mkWindow =
-  createWindow
+  withWindow
      windowTitle
      WinPosCentered
      WinPosCentered
@@ -15,13 +15,12 @@ mkWindow =
      windowHeight
      [WindowShown]
 
-showLogo logo = do
- sdlInit [InitVideo]
- window <- mkWindow
+showLogo logo =
+ withSdl [InitVideo] $
+ mkWindow $ \window -> do
  image <- loadBmp logo
  drawImage image window
  waitForExit
- sdlQuit
  return True
 
 waitForExit = do

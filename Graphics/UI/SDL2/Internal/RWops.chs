@@ -5,7 +5,7 @@ module Graphics.UI.SDL2.Internal.RWops(
   mkRWops,
   mkUnhandledRWops,
   peekRWops,
-  withRWops) where
+  withRWopsPtr) where
 import Foreign
 
 import Control.Monad 
@@ -19,6 +19,8 @@ import Control.Monad
 
 foreign import ccall "SDL2/SDL_rwops.h &SDL_FreeRW"
   freeRWops :: FunPtr(Ptr RWops -> IO())
+
+withRWopsPtr = withRWops
 
 mkRWops :: Ptr RWops -> IO RWops
 mkRWops p = liftM RWops . newForeignPtr freeRWops =<< checkNull p

@@ -5,7 +5,7 @@ module Graphics.UI.SDL2.Internal.Texture(
   mkTexture,
   mkUnhandledTexture,
   peekTexture,
-  withTexture) where
+  withTexturePtr) where
 import Foreign
 
 import Control.Monad
@@ -20,6 +20,8 @@ import Control.Monad
 
 foreign import ccall "SDL2/SDL_render.h &SDL_DestroyTexture"
   destroyTexture :: FunPtr(Ptr Texture -> IO())
+
+withTexturePtr = withTexture
 
 mkTexture :: Ptr Texture -> IO Texture
 mkTexture p = liftM Texture . newForeignPtr destroyTexture =<< checkNull p
