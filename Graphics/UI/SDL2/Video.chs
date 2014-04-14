@@ -29,14 +29,14 @@ import Foreign.C.Types
 
 {- | Run an IO action on a window -}
 withWindow ::
-  String -> -- ^ The title of the window.
-  WinPos -> -- ^ The x position of the window.
-  WinPos -> -- ^ The y position of the window.
-  Int    -> -- ^ The width of the window.
-  Int    -> -- ^ The height of the window.
-  [WindowFlag] -> -- ^ The flags for the window.
-  (Window -> IO a) -> -- ^ The action to run with the window.
-  IO a
+  String -- ^ The title of the window.
+  -> WinPos -- ^ The x position of the window.
+  -> WinPos -- ^ The y position of the window.
+  -> Int    -- ^ The width of the window.
+  -> Int    -- ^ The height of the window.
+  -> [WindowFlag] -- ^ The flags for the window.
+  -> (Window -> IO a) -- ^ The action to run with the window.
+  -> IO a
 
 withWindow s p1 p2 w h fs f = do
   win <- createWindow s p1 p2 w h fs

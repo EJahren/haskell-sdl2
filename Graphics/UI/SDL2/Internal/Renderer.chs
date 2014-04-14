@@ -56,11 +56,11 @@ peekRenderer p = mkRenderer =<< peekWCheck p
 
 {- | Set a texture as the current rendering target.-}
 setRenderTarget ::
-  Renderer -> -- ^ The renderer.
-  Texture  -> -- ^ The targeted texture, which must be
+  Renderer -- ^ The renderer.
+  -> Texture -- ^ The targeted texture, which must be
               -- created with the TextureAccessTarget flag, or NULL
               -- for the default render target
-  IO ()
+  -> IO ()
 setRenderTarget r t = do
  c_setRenderTarget r t
  writeIORef (renderTarget r) (Just t)

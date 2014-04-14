@@ -81,18 +81,18 @@ deriving (Eq,Ord,Show)#}
 deriving (Eq,Ord,Show)#}
 
 withWindowAndRenderer ::
-  String -> -- ^ The title of the window.
-  WinPos -> -- ^ The x position of the window.
-  WinPos -> -- ^ The y position of the window.
-  Int    -> -- ^ The width of the window.
-  Int    -> -- ^ The height of the window.
-  [WindowFlag] -> -- ^ The flags for the window.
-  Int    -> -- ^ The index of the rendering drice to initiate,
-            --     -1 to initialize the first one supporting
-            --     the requested flags.
-  [RendererFlag] ->
-  ((Window,Renderer) -> IO a) -> -- ^ The action to run with the window and the Renderer.
-  IO a
+  String -- ^ The title of the window.
+  -> WinPos -- ^ The x position of the window.
+  -> WinPos -- ^ The y position of the window.
+  -> Int    -- ^ The width of the window.
+  -> Int    -- ^ The height of the window.
+  -> [WindowFlag]  -- ^ The flags for the window.
+  -> Int    -- ^ The index of the rendering drice to initiate,
+          --     -1 to initialize the first one supporting
+          --     the requested flags.
+  -> [RendererFlag]
+  -> ((Window,Renderer) -> IO a) -- ^ The action to run with the window and the Renderer.
+  -> IO a
 withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
   win <- createWindow str p1 p2 w h wfs
   rend <- createRenderer win rfs i
@@ -104,10 +104,10 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 
 -- | Create a window and default renderer
 -- >createWindowAndRenderer ::
--- >  Int -> -- ^ The width of the window
--- >  Int -> -- ^ The height of the window
--- >  [WindowFlag] -> --^  The flags used to create the window
--- >  IO (Window,Renderer) 
+-- >  Int -- ^ The width of the window
+-- >  -> Int -- ^ The height of the window
+-- >  -> [WindowFlag] --^  The flags used to create the window
+-- >  -> IO (Window,Renderer) 
 {#fun unsafe CreateWindowAndRenderer as createWindowAndRenderer
   {
    `Int'
@@ -130,13 +130,13 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 {- | Copy a portion of the texture to the current rendering target.
 
   >renderCopy ::
-  >  Renderer   -> -- ^ The renderer which should copy parts of a texture.
-  >  Texture    -> -- ^ The source texture.
-  >  Maybe Rect -> -- ^ The source Rectangle,
+  >  Renderer   -- ^ The renderer which should copy parts of a texture.
+  >  -> Texture    -- ^ The source texture.
+  >  -> Maybe Rect -- ^ The source Rectangle,
                    -- if Nothing the entire Texture is used.
-  >  Maybe Rect -> -- ^ The destination rectangle,
+  >  -> Maybe Rect -- ^ The destination rectangle,
                    -- if Nothing the entire target is used.
-  >  IO ()
+  >  -> IO ()
 -}
 {#fun RenderCopy as renderCopy
   {
@@ -153,12 +153,12 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 
 {- | Draw a line on the current rendering target.
   >renderDrawLine ::
-  >  Renderer -> -- ^ The renderer which should draw a line.
-  >  Int      -> -- ^The x coordinate of the start point.
-  >  Int      -> -- ^The y coordinate of the start point.
-  >  Int      -> -- ^The x coordinate of the end point.
-  >  Int      -> -- ^The y coordinate of the end point.
-  >  IO ()
+  >  Renderer -- ^ The renderer which should draw a line.
+  >  -> Int   -- ^The x coordinate of the start point.
+  >  -> Int   -- ^The y coordinate of the start point.
+  >  -> Int   -- ^The x coordinate of the end point.
+  >  -> Int   -- ^The y coordinate of the end point.
+  >  -> IO ()
 -}
 {#fun RenderDrawLine as renderDrawLine
   {
@@ -172,19 +172,12 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 {- | 
 Set the color used for drawing operations (Rect, Line and Clear).
  >setRenderDrawColor ::
- >  Renderer -> -- ^
- >  Word8 -> -- ^  The red value used to draw on the rendering target.
- >  Word8 -> -- ^  The green value used to draw on the rendering target.
- >  Word8 -> -- ^  The blue value used to draw on the rendering target.
- >  Word8 -> -- ^  The alpha value used to draw on the rendering target, usually 255.
- >  IO ()
-
-renderer The renderer for which drawing color should be set.
-r
-g The green value used to draw on the rendering target.
-b The blue value used to draw on the rendering target.
-a The alpha value used to draw on the rendering target, usually
-  ::SDL_ALPHA_OPAQUE (255).
+ >  Renderer 
+ >  -> Word8 -- ^  The red value used to draw on the rendering target.
+ >  -> Word8 -- ^  The green value used to draw on the rendering target.
+ >  -> Word8 -- ^  The blue value used to draw on the rendering target.
+ >  -> Word8 -- ^  The alpha value used to draw on the rendering target, usually 255.
+ >  -> IO ()
 -}
 {#fun SetRenderDrawColor as setRenderDrawColor
   {
@@ -199,12 +192,12 @@ a The alpha value used to draw on the rendering target, usually
 {- | Create a texture for a rendering context.
 
  >createTexture :: 
- >  Renderer        -> -- ^ The renderer.
- >  PixelFormatType -> -- ^ The format of the texture.
- >  TextureAccess   -> -- ^ One of the enumerated values in ::SDL_TextureAccess.
- >  Int             -> -- ^ The width of the texture in pixels.
- >  Int             -> -- ^ The height of the texture in pixels.
- >  IO Texture 
+ >  Renderer           -- ^ The renderer.
+ >  -> PixelFormatType -- ^ The format of the texture.
+ >  -> TextureAccess   -- ^ One of the enumerated values in ::SDL_TextureAccess.
+ >  -> Int             -- ^ The width of the texture in pixels.
+ >  -> Int             -- ^ The height of the texture in pixels.
+ >  -> IO Texture 
 -}
 {#fun CreateTexture as createTexture
   {
