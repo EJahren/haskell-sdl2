@@ -19,6 +19,7 @@ import Graphics.UI.SDL2.Common
 {# import Graphics.UI.SDL2.Internal.RWops#}
 
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_rect.h>
 
 {#fun SDL_LoadBMP_RW as loadBmpRw
   {

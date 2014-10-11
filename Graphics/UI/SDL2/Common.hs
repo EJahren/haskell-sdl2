@@ -19,3 +19,5 @@ withPtr x f = alloca (\p -> poke p x >> f p)
 withMayPtr :: (Storable a) => Maybe a -> (Ptr a -> IO b) -> IO b
 withMayPtr (Just x) f = withPtr x f
 withMayPtr Nothing f = f nullPtr 
+
+withArr xs f = withArrayLen xs (\x y -> f (y,fromIntegral x))

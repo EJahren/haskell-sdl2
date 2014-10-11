@@ -103,16 +103,11 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 
 
 -- | Create a window and default renderer
--- >createWindowAndRenderer ::
--- >  Int -- ^ The width of the window
--- >  -> Int -- ^ The height of the window
--- >  -> [WindowFlag] --^  The flags used to create the window
--- >  -> IO (Window,Renderer) 
 {#fun unsafe CreateWindowAndRenderer as createWindowAndRenderer
   {
-   `Int'
-   ,`Int'
-   ,flagToC `[WindowFlag]'
+   `Int'                             -- ^ The width of the window
+   ,`Int'                            -- ^ The height of the window
+   ,flagToC `[WindowFlag]'           -- ^ The flags used to create the window
    ,alloca- `Window' peekWindow*
    ,alloca- `Renderer' peekRenderer*
   } -> `() ' checkError*-#} 
@@ -128,22 +123,15 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 
 
 {- | Copy a portion of the texture to the current rendering target.
-
-  >renderCopy ::
-  >  Renderer   -- ^ The renderer which should copy parts of a texture.
-  >  -> Texture    -- ^ The source texture.
-  >  -> Maybe Rect -- ^ The source Rectangle,
-                   -- if Nothing the entire Texture is used.
-  >  -> Maybe Rect -- ^ The destination rectangle,
-                   -- if Nothing the entire target is used.
-  >  -> IO ()
 -}
 {#fun RenderCopy as renderCopy
   {
-    withRendererPtr* `Renderer'
-    ,withTexturePtr* `Texture'
-    ,withMayPtr*  `Maybe Rect'
-    ,withMayPtr*  `Maybe Rect'
+    withRendererPtr* `Renderer' -- ^ The renderer which should copy parts of a texture.
+    ,withTexturePtr* `Texture'  -- ^ The source texture.
+    ,withMayPtr*  `Maybe Rect'  -- ^ The source Rectangle,
+                                -- if Nothing the entire Texture is used.
+    ,withMayPtr*  `Maybe Rect'  -- ^ The destination rectangle,
+                                -- if Nothing the entire target is used.
   } -> `() ' checkError*-#}
 
 {#fun RenderPresent as renderPresent
@@ -152,58 +140,36 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
   } -> `()'#}
 
 {- | Draw a line on the current rendering target.
-  >renderDrawLine ::
-  >  Renderer -- ^ The renderer which should draw a line.
-  >  -> Int   -- ^The x coordinate of the start point.
-  >  -> Int   -- ^The y coordinate of the start point.
-  >  -> Int   -- ^The x coordinate of the end point.
-  >  -> Int   -- ^The y coordinate of the end point.
-  >  -> IO ()
 -}
 {#fun RenderDrawLine as renderDrawLine
   {
-   withRendererPtr* `Renderer'
-   ,`Int'
-   ,`Int'
-   ,`Int'
-   ,`Int'
+   withRendererPtr* `Renderer' -- ^ The renderer which should draw a line.
+   ,`Int'                      -- ^The x coordinate of the start point.
+   ,`Int'                      -- ^The y coordinate of the start point.
+   ,`Int'                      -- ^The x coordinate of the end point.
+   ,`Int'                      -- ^The y coordinate of the end point.
   } -> `() ' checkError*-#}
 
 {- | 
 Set the color used for drawing operations (Rect, Line and Clear).
- >setRenderDrawColor ::
- >  Renderer 
- >  -> Word8 -- ^  The red value used to draw on the rendering target.
- >  -> Word8 -- ^  The green value used to draw on the rendering target.
- >  -> Word8 -- ^  The blue value used to draw on the rendering target.
- >  -> Word8 -- ^  The alpha value used to draw on the rendering target, usually 255.
- >  -> IO ()
 -}
 {#fun SetRenderDrawColor as setRenderDrawColor
   {
    withRendererPtr* `Renderer'
-   ,`Word8'
-   ,`Word8'
-   ,`Word8'
-   ,`Word8'
+   ,`Word8'  -- ^  The red value used to draw on the rendering target.
+   ,`Word8'  -- ^  The green value used to draw on the rendering target.
+   ,`Word8'  -- ^  The blue value used to draw on the rendering target.
+   ,`Word8'  -- ^  The alpha value used to draw on the rendering target, usually 255.
   } -> `() ' checkError*-#}
 
 
 {- | Create a texture for a rendering context.
-
- >createTexture :: 
- >  Renderer           -- ^ The renderer.
- >  -> PixelFormatType -- ^ The format of the texture.
- >  -> TextureAccess   -- ^ One of the enumerated values in ::SDL_TextureAccess.
- >  -> Int             -- ^ The width of the texture in pixels.
- >  -> Int             -- ^ The height of the texture in pixels.
- >  -> IO Texture 
 -}
 {#fun CreateTexture as createTexture
   {
-   withRendererPtr* `Renderer',
-   enumToC `PixelFormatType',
-   enumToC `TextureAccess',
-   `Int',
-   `Int'
+   withRendererPtr* `Renderer' -- ^ The renderer.
+   ,enumToC `PixelFormatType'  -- ^ The format of the texture.
+   ,enumToC `TextureAccess'    -- ^ One of the enumerated values in ::SDL
+   ,`Int'                      -- ^ The width of the texture in pixels.
+   ,`Int'                      -- ^ The height of the texture in pixels.
    } -> `Texture' mkTexture* #}

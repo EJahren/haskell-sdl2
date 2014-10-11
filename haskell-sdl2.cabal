@@ -58,4 +58,6 @@ library
     CPP,
     BangPatterns,
     ForeignFunctionInterface
-  build-depends:       base == 4.6.*
+  build-depends:
+    base == 4.6.*,
+    QuickCheck >= 2.6
