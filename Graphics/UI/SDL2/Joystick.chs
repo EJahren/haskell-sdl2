@@ -6,7 +6,7 @@ import Foreign
 
 {#context lib = "SDL2"#}
 
-type JoystickID = Word32
+type JoystickID = Int32
 
 {#enum define HatPos
   { SDL_HAT_CENTERED  as HatCentered,

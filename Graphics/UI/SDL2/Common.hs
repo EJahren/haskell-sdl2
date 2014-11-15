@@ -1,4 +1,4 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE NoMonomorphismRestriction#-}
 module Graphics.UI.SDL2.Common where
 
 import Foreign

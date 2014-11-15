@@ -30,3 +30,4 @@ textureTest =
   renderDrawLine renderer 0 0 100 100
   performGC
   renderDrawLine renderer 0 0 100 100
+  return True

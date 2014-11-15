@@ -9,8 +9,16 @@ module Main where
   from the root directory of the project.
 -}
 import System.Exit (exitFailure)
+import Control.Monad
 
 import Automatic.TextureTest
+import Automatic.RectTest
 
-main = textureTest
+main = do
+  b <- fmap and $ sequence 
+    [
+     textureTest
+     ,rectTest
+    ]
+  unless b exitFailure
 

@@ -17,13 +17,13 @@ cabal-version:       >=1.8
 Test-Suite interactive
   type: exitcode-stdio-1.0
   main-is: Interactive.hs
-  build-depends: base, haskell-sdl2
+  build-depends: base, haskell-sdl2, QuickCheck
   hs-source-dirs: Tests
 
 Test-Suite automatic
   type: exitcode-stdio-1.0
   main-is: Automatic.hs
-  build-depends: base, haskell-sdl2
+  build-depends: base, haskell-sdl2, QuickCheck
   hs-source-dirs: Tests
 
 library
@@ -49,7 +49,7 @@ library
     Graphics.UI.SDL2.Touch,
     Graphics.UI.SDL2.Gesture,
     Graphics.UI.SDL2.Keyboard,
-    Graphics.UI.SDL2.Joystick
+    Graphics.UI.SDL2.Joystick,
     Graphics.UI.SDL2.Events,
     Graphics.UI.SDL2
   extra-libraries: SDL2

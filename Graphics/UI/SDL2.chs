@@ -7,6 +7,8 @@ module Graphics.UI.SDL2(
   module Graphics.UI.SDL2.Video,
   module Graphics.UI.SDL2.Render,
   module Graphics.UI.SDL2.Pixels,
+  module Graphics.UI.SDL2.Keyboard,
+  module Graphics.UI.SDL2.Keycode,
   withSdl,
   InitOption(..)
   )where
@@ -23,6 +25,8 @@ import Graphics.UI.SDL2.Common
 {# import Graphics.UI.SDL2.Render #}
 {# import Graphics.UI.SDL2.Pixels #}
 {# import Graphics.UI.SDL2.Internal.Error #}
+{# import Graphics.UI.SDL2.Keyboard #}
+{# import Graphics.UI.SDL2.Keycode #}
 
 #include <SDL2/SDL.h>
 {#context lib = "SDL2"#}

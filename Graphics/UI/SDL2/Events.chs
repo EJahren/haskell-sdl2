@@ -38,138 +38,138 @@ type ButtonState = KeyState
 ----------------------------------------------
 data Event =
      FirstEvent{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | Quit{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | AppTerminating{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | AppLowMemory{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | AppWillEnterBackground{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | AppDidEnterBackground{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | AppWillEnterForeground{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | AppDidEnterForeground{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | WindowEvent{
-       timestamp  :: Word32,
-       winID      :: Word32,
+       timestamp  :: Int32,
+       winID      :: Int32,
        winEventId :: WindowEventID} 
    | SysWMEvent{
-       timestamp :: Word32}
+       timestamp :: Int32}
    | KeyDown{
-       timestamp  :: Word32,
-       winID      :: Word32,
+       timestamp  :: Int32,
+       winID      :: Int32,
        state      :: KeyState,
        isRepeat   :: Bool,
        keysym     :: Keysym}
    | KeyUp{
-       timestamp  :: Word32,
-       winID      :: Word32,
+       timestamp  :: Int32,
+       winID      :: Int32,
        state      :: KeyState,
        isRepeat   :: Bool,
        keysym     :: Keysym}
    | TextEditing{
-       timestamp  :: Word32,
-       winID      :: Word32,
+       timestamp  :: Int32,
+       winID      :: Int32,
        text       :: String,
-       start      :: Int,
-       len        :: Int}
+       start      :: Int32,
+       len        :: Int32}
    | TextInput{
-       timestamp  :: Word32,
-       winID      :: Word32,
+       timestamp  :: Int32,
+       winID      :: Int32,
        text       :: String}
    | MouseMotion{
-       timestamp   :: Word32,
-       whichMouse  :: Word32,
-       winID      :: Word32,
+       timestamp   :: Int32,
+       whichMouse  :: Int32,
+       winID      :: Int32,
        buttonState :: ButtonState,
-       x           :: Int,
-       y           :: Int,
-       xRel        :: Int,
-       yRel        :: Int}
+       x           :: Int32,
+       y           :: Int32,
+       xRel        :: Int32,
+       yRel        :: Int32}
    | MouseButtonDown {
-       timestamp   :: Word32,
-       winID      :: Word32,
-       whichMouse  :: Word32,
+       timestamp   :: Int32,
+       winID      :: Int32,
+       whichMouse  :: Int32,
        buttonState :: ButtonState,
        whichButton :: Word8,
-       x           :: Int,
-       y           :: Int}
+       x           :: Int32,
+       y           :: Int32}
    | MouseButtonUp {
-       timestamp   :: Word32,
-       winID      :: Word32,
-       whichMouse  :: Word32,
+       timestamp   :: Int32,
+       winID      :: Int32,
+       whichMouse  :: Int32,
        buttonState :: ButtonState,
        whichButton :: Word8,
-       x           :: Int,
-       y           :: Int}
+       x           :: Int32,
+       y           :: Int32}
    | MouseWheel {
-       timestamp  :: Word32,
-       winID      :: Word32,
-       mouseId    :: Word32,
-       xScrol     :: Int,
-       yScrol     :: Int}
+       timestamp  :: Int32,
+       winID      :: Int32,
+       mouseId    :: Int32,
+       xScrol     :: Int32,
+       yScrol     :: Int32}
    | JoyAxisMotion {
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichJS    :: JoystickID,
        axis       :: Word8,
        value      :: Int16}
    | JoyBallMotion{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichJS    :: JoystickID,
        ball       :: Word8,
-       xRel       :: Int,
-       yRel       :: Int}
+       xRel       :: Int32,
+       yRel       :: Int32}
    | JoyHatMotion{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichJS    :: JoystickID,
        hat        :: Word8,
        pos        :: HatPos}
    | JoyButtonDown{
-       timestamp     :: Word32,
+       timestamp     :: Int32,
        whichJS       :: JoystickID,
        whichButtonJS :: Word8,
        buttonStateJS :: ButtonState}
    | JoyButtonUp{
-       timestamp     :: Word32,
+       timestamp     :: Int32,
        whichJS       :: JoystickID,
        whichButtonJS :: Word8,
        buttonStateJS :: ButtonState}
    | JoyDeviceAdded{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichJS    :: JoystickID}
    | JoyDeviceRemoved{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichJS    :: JoystickID}
    | ControllerAxisMotion{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichCtrl  :: JoystickID,
        axis       :: Word8,
        value      :: Int16}
    | ControllerButtonDown{
-       timestamp        :: Word32,
+       timestamp        :: Int32,
        whichCtrl        :: JoystickID,
        whichButtonCtrlr :: Word8,
        buttonStateCtrlr :: ButtonState}
    | ControllerButtonUp{
-       timestamp        :: Word32,
+       timestamp        :: Int32,
        whichCtrl        :: JoystickID,
        whichButtonCtrlr :: Word8,
        buttonStateCtrlr :: ButtonState}
    | ControllerDeviceAdded{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichCtrlr :: JoystickID}
    | ControllerDeviceRemoved{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichCtrlr :: JoystickID}
    | ControllerDeviceRemapped{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        whichCtrlr :: JoystickID}
    | FingerDown {
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        touchId    :: TouchID,
        fingerId   :: FingerID,
        xRng       :: Float,
@@ -178,7 +178,7 @@ data Event =
        deltay     :: Float,
        pressure   :: Float}
    | FingerUp{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        touchId    :: TouchID,
        fingerId   :: FingerID,
        xRng       :: Float,
@@ -187,7 +187,7 @@ data Event =
        deltay     :: Float,
        pressure   :: Float}
    | FingerMotion{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        touchId    :: TouchID,
        fingerId   :: FingerID,
        xRng       :: Float,
@@ -196,32 +196,32 @@ data Event =
        deltay     :: Float,
        pressure   :: Float}
    | DollarGesture{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        touchId    :: TouchID,
        gestureId  :: GestureID,
-       numFingers :: Int,
+       numFingers :: Int32,
        derror     :: Float,
        xCent      :: Float,
        yCent      :: Float}
    | DollarRecord{
-       timestamp  :: Word32}
+       timestamp  :: Int32}
    | MultiGesture{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        touchId    :: TouchID,
        dTheta     :: Float,
        dDist      :: Float,
        xRng       :: Float,
        yRng       :: Float,
-       numFingers :: Int}
+       numFingers :: Int32}
    | ClipBoardUpdate{
-       timestamp  :: Word32}
+       timestamp  :: Int32}
    | DropFile{
-       timestamp  :: Word32,
+       timestamp  :: Int32,
        file       :: FilePath}
    | UserEvent{
-       timestamp  :: Word32}
+       timestamp  :: Int32}
    | LastEvent{
-       timestamp  :: Word32}
+       timestamp  :: Int32}
     deriving (Eq, Ord, Show)
 
 {#pointer *SDL_Event as EventPtr -> Event#}
@@ -288,7 +288,7 @@ peekFinger c p tmstmp =
     (realToFrac   <$> {#get SDL_Event.tfinger.dy#}       p) <*>
     (realToFrac   <$> {#get SDL_Event.tfinger.pressure#} p)
 
-setKeyData :: (Word32,ButtonState,Bool,Keysym) -> EventPtr -> IO ()
+setKeyData :: (Int32,ButtonState,Bool,Keysym) -> EventPtr -> IO ()
 setKeyData (w, s, i, (Keysym sc k m)) p = do
   {#set SDL_Event.key.windowID #} p (fromIntegral w)
   {#set SDL_Event.key.state #} p (enumToC s)
@@ -298,7 +298,7 @@ setKeyData (w, s, i, (Keysym sc k m)) p = do
   {#set SDL_Event.key.keysym.mod #} p (enumToC m)
 
 setMButtonEv ::
-  (Word32,Word32,ButtonState,Word8,Int,Int) -> EventPtr -> IO ()
+  (Int32,Int32,ButtonState,Word8,Int32,Int32) -> EventPtr -> IO ()
 setMButtonEv (w,m,s,wb,x',y') p = do
   {#set SDL_Event.button.windowID #} p (fromIntegral w)
   {#set SDL_Event.button.which #} p (fromIntegral m)
@@ -307,13 +307,13 @@ setMButtonEv (w,m,s,wb,x',y') p = do
   {#set SDL_Event.button.x #} p (fromIntegral x')
   {#set SDL_Event.button.y #} p (fromIntegral y')
 
-setJButton :: (Word32,Word8,ButtonState) -> EventPtr -> IO ()
+setJButton :: (Int32,Word8,ButtonState) -> EventPtr -> IO ()
 setJButton (j,wb,bs) p = do
   {#set SDL_Event.jbutton.which #} p (fromIntegral j)
   {#set SDL_Event.jbutton.button #} p (fromIntegral wb)
   {#set SDL_Event.jbutton.state #} p (enumToC bs)
 
-setCButtonEv :: (Word32,Word8,ButtonState) -> EventPtr -> IO ()
+setCButtonEv :: (Int32,Word8,ButtonState) -> EventPtr -> IO ()
 setCButtonEv (wc, wbc, c) p = do
   {#set SDL_Event.cbutton.which#} p (fromIntegral wc)
   {#set SDL_Event.cbutton.button#} p (fromIntegral wbc)

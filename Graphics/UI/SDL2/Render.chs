@@ -34,7 +34,8 @@ module Graphics.UI.SDL2.Render(
  getRenderTarget,
  setRenderDrawColor,
  createTexture,
- renderDrawLine
+ renderDrawLine,
+ renderDrawPoint
  ) where
 import Foreign
 import Foreign.C.Types
@@ -173,3 +174,21 @@ Set the color used for drawing operations (Rect, Line and Clear).
    ,`Int'                      -- ^ The width of the texture in pixels.
    ,`Int'                      -- ^ The height of the texture in pixels.
    } -> `Texture' mkTexture* #}
+
+{- |
+ Draw a point on the current rendering target.
+-}
+renderDrawPoint ::
+  Renderer  -- ^  The renderer which should draw a point.
+  -> Point  -- ^  The point to draw on.
+  -> IO ()
+renderDrawPoint r (Point x y) =
+ c_renderDrawPoint r x y
+
+
+{#fun RenderDrawPoint as c_renderDrawPoint
+  {
+   withRendererPtr* `Renderer' -- ^  The renderer which should draw a point.
+   ,`Int32' -- ^ The x coordinate point to draw on.
+   ,`Int32' -- ^ The y coordinate point to draw on.
+  } -> `()' checkError*- #}

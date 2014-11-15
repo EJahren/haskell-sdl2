@@ -17,7 +17,7 @@ import Graphics.UI.SDL2.Common
 import System.IO.Unsafe(unsafePerformIO)
 import Foreign hiding(unsafePerformIO)
 import Foreign.C.Types
-import Test.QuickCheck.Arbitrary
+import Test.QuickCheck
 
 import Control.Monad
 import Control.Applicative
@@ -28,9 +28,9 @@ import Data.List
 {#context lib = "SDL2" prefix = "SDL"#}
 
 data Point = Point {
-  pointX :: Int,
-  pointY :: Int
-  }
+  pointX :: Int32,
+  pointY :: Int32
+  } deriving (Show,Eq,Ord)
 
 instance Storable Point where
   sizeOf _ = {#sizeof Point #}
@@ -45,8 +45,8 @@ instance Storable Point where
 
 instance Arbitrary Point where
   arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
+    x <- choose (0,4012)
+    y <- choose (0,4012)
     return (Point x y)
   shrink (Point x y) =
    zipWith Point (shrink x) (shrink y)
@@ -54,10 +54,10 @@ instance Arbitrary Point where
 
 -- | A rectangle, with the origin at the upper left.
 data Rect = Rect {
-  xCoord :: Int,
-  yCoord :: Int,
-  width :: Int,
-  height :: Int}
+  xCoord :: Int32,
+  yCoord :: Int32,
+  width :: Int32,
+  height :: Int32}  deriving (Show,Eq,Ord)
 
 {#pointer *Rect as RectPtr -> Rect #}
  
@@ -78,60 +78,60 @@ instance Storable Rect where
 
 instance Arbitrary Rect where
   arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
-    w <- arbitrary
-    h <- arbitrary
+    x <- choose (0,4012)
+    y <- choose (0,4012)
+    w <- choose (0,4012)
+    h <- choose (0,4012)
     return (Rect x y w h)
   shrink (Rect x y w h) =
    zipWith4 Rect (shrink x) (shrink y) (shrink w) (shrink h)
 
-{- |
-  Returns true if the rectangle has no area.
--}
-{#fun RectEmpty as rectEmpty
-  {withPtr* `Rect'} -> `Bool' #}
-
-{- |
- Returns true if the two rectangles are equal.
--}
-{#fun pure RectEquals as rectEquals
-  {withPtr* `Rect',
-   withPtr* `Rect'} -> `Bool' #}
-
-instance Eq Rect where
-  (==) = rectEquals
+rectEmpty (Rect _ _ _ 0) = True
+rectEmpty (Rect _ _ 0 _) = True
+rectEmpty _              = False
 
 {- |
  Determine whether two rectangles intersect.
  Returns True if the two rectangles intersect.
 -}
-{#fun pure HasIntersection as hasIntersection
+hasIntersection :: Rect -> Rect -> Bool
+hasIntersection r1 r2 = unsafePerformIO (hasIntersection_ r1 r2)
+
+{#fun HasIntersection as hasIntersection_
   {withPtr* `Rect',
    withPtr* `Rect'} -> `Bool'#}
 
 {- |
-  Calculate the intersection of two rectangles.
- Returns True if there is an intersection, False otherwise.
+  Calculate the intersection of two rectangles,
+  Returns True if the intersection exists.
 -}
-{#fun pure IntersectRect as intersectRect 
+intersectRect :: Rect -> Rect -> (Bool,Rect)
+intersectRect r1 r2 = unsafePerformIO (intersectRect_ r1 r2)
+
+{#fun IntersectRect as intersectRect_
   {withPtr* `Rect',
    withPtr* `Rect',
-   alloca-`Rect'peek*} -> `()'#}
+   alloca-`Rect'peek*} -> `Bool'#}
 
 {- |
 Calculate the union of two rectangles.
 -}
-{#fun pure  UnionRect as unionRect
+unionRect :: Rect -> Rect -> Rect
+unionRect r1 r2 = unsafePerformIO (unionRect_ r1 r2)
+
+{#fun UnionRect as unionRect_
   {withPtr* `Rect',
    withPtr* `Rect',
    alloca- `Rect' peek*} -> `()'#}
 
 
 {- |Calculate a minimal rectangle enclosing a set of points
-  Returns True if any points were within the clipping rect
+  Returns True if any points were within the clipping rect_
 -}
-{#fun EnclosePoints as enclosedPoints
+enclosedPoints :: [Point] -> Rect -> (Bool,Rect)
+enclosedPoints ps r1 = unsafePerformIO (enclosedPoints_ ps r1)
+
+{#fun EnclosePoints as enclosedPoints_
  {withArr* `[Point]'&,
   withPtr* `Rect',
   alloca- `Rect' peek*} -> `Bool'#}
@@ -147,17 +147,17 @@ intersectRectAndLine ::
   -> Bool -- ^ Wether or not the line intersects with
           -- the rectangle
 intersectRectAndLine r (Point x1 y1) (Point x2 y2) =
-  c_intersectRectAndLine r
+  unsafePerformIO (c_intersectRectAndLine r
    (fromIntegral x1)
    (fromIntegral y1) 
    (fromIntegral x2)
-   (fromIntegral y2)
+   (fromIntegral y2))
 
-{#fun pure IntersectRectAndLine as c_intersectRectAndLine
+{#fun IntersectRectAndLine as c_intersectRectAndLine
   {withPtr* `Rect'
    ,withPtr* `CInt' -- ^ x1
    ,withPtr* `CInt' -- ^ y1
-   ,withPtr* `CInt' -- ^ x2,
-   ,withPtr* `CInt' -- ^ y2,
+   ,withPtr* `CInt' -- ^ x2
+   ,withPtr* `CInt' -- ^ y2
   } -> `Bool' #}
 
