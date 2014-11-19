@@ -85,10 +85,10 @@ withWindowAndRenderer ::
   String -- ^ The title of the window.
   -> WinPos -- ^ The x position of the window.
   -> WinPos -- ^ The y position of the window.
-  -> Int    -- ^ The width of the window.
-  -> Int    -- ^ The height of the window.
+  -> Int32  -- ^ The width of the window.
+  -> Int32  -- ^ The height of the window.
   -> [WindowFlag]  -- ^ The flags for the window.
-  -> Int    -- ^ The index of the rendering drice to initiate,
+  -> Int32  -- ^ The index of the rendering drice to initiate,
           --     -1 to initialize the first one supporting
           --     the requested flags.
   -> [RendererFlag]
@@ -106,8 +106,8 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 -- | Create a window and default renderer
 {#fun unsafe CreateWindowAndRenderer as createWindowAndRenderer
   {
-   `Int'                             -- ^ The width of the window
-   ,`Int'                            -- ^ The height of the window
+   `Int32'                             -- ^ The width of the window
+   ,`Int32'                            -- ^ The height of the window
    ,flagToC `[WindowFlag]'           -- ^ The flags used to create the window
    ,alloca- `Window' peekWindow*
    ,alloca- `Renderer' peekRenderer*
@@ -145,10 +145,10 @@ withWindowAndRenderer str p1 p2 w h wfs rfs i f = do
 {#fun RenderDrawLine as renderDrawLine
   {
    withRendererPtr* `Renderer' -- ^ The renderer which should draw a line.
-   ,`Int'                      -- ^The x coordinate of the start point.
-   ,`Int'                      -- ^The y coordinate of the start point.
-   ,`Int'                      -- ^The x coordinate of the end point.
-   ,`Int'                      -- ^The y coordinate of the end point.
+   ,`Int32'                    -- ^The x coordinate of the start point.
+   ,`Int32'                    -- ^The y coordinate of the start point.
+   ,`Int32'                    -- ^The x coordinate of the end point.
+   ,`Int32'                    -- ^The y coordinate of the end point.
   } -> `() ' checkError*-#}
 
 {- | 
@@ -171,8 +171,8 @@ Set the color used for drawing operations (Rect, Line and Clear).
    withRendererPtr* `Renderer' -- ^ The renderer.
    ,enumToC `PixelFormatType'  -- ^ The format of the texture.
    ,enumToC `TextureAccess'    -- ^ One of the enumerated values in ::SDL
-   ,`Int'                      -- ^ The width of the texture in pixels.
-   ,`Int'                      -- ^ The height of the texture in pixels.
+   ,`Int32'                    -- ^ The width of the texture in pixels.
+   ,`Int32'                    -- ^ The height of the texture in pixels.
    } -> `Texture' mkTexture* #}
 
 {- |

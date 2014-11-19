@@ -14,10 +14,12 @@ import Interactive.SdlLogo
 import qualified Interactive.SdlLogoRenderer as R
 import Interactive.DrawLine
 import Interactive.DrawPoints
+import Interactive.DrawLines
 
 main = do 
   showLogo "Tests/Interactive/sdl_logo.bmp"
   R.showLogo "Tests/Interactive/sdl_logo.bmp"
   drawLine (0,0) (100,100)
   drawPoints
+  drawLines
 

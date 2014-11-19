@@ -32,8 +32,8 @@ withWindow ::
   String -- ^ The title of the window.
   -> WinPos -- ^ The x position of the window.
   -> WinPos -- ^ The y position of the window.
-  -> Int    -- ^ The width of the window.
-  -> Int    -- ^ The height of the window.
+  -> Int32    -- ^ The width of the window.
+  -> Int32    -- ^ The height of the window.
   -> [WindowFlag] -- ^ The flags for the window.
   -> (Window -> IO a) -- ^ The action to run with the window.
   -> IO a

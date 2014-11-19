@@ -87,6 +87,6 @@ getRenderTarget r = do
 {#fun SDL_CreateRenderer as createRenderer
   {
     withWindowPtr* `Window'
-    ,`Int'
+    ,`Int32'
     ,flagToC `[RendererFlag]'
   } -> `Renderer' mkRenderer* #}

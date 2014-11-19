@@ -42,7 +42,7 @@ withWindowPtr p f =  f p
    `String'
    ,enumToC `WinPos'
    ,enumToC `WinPos'
-   ,`Int'
-   ,`Int'
+   ,`Int32'
+   ,`Int32'
    ,flagToC `[WindowFlag]'
  } -> `Window' mkWindow* #} 
