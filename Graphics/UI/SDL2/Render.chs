@@ -35,7 +35,9 @@ module Graphics.UI.SDL2.Render(
  setRenderDrawColor,
  createTexture,
  renderDrawLine,
- renderDrawPoint
+ renderDrawPoint,
+ renderDrawRect,
+ renderFillRect
  ) where
 import Foreign
 import Foreign.C.Types
@@ -191,4 +193,22 @@ renderDrawPoint r (Point x y) =
    withRendererPtr* `Renderer' -- ^  The renderer which should draw a point.
    ,`Int32' -- ^ The x coordinate point to draw on.
    ,`Int32' -- ^ The y coordinate point to draw on.
+  } -> `()' checkError*- #}
+
+{- |
+ Draw a rectangle on the current rendering target.
+-}
+{#fun RenderDrawRect as renderDrawRect
+  {
+   withRendererPtr* `Renderer' -- ^  The renderer which should draw a Rectangle.
+   , withPtr* `Rect' -- ^ The destination Rect.
+  } -> `()' checkError*- #}
+
+{- |
+ Fill a rectangle on the current rendering target with the drawing color.
+-}
+{#fun RenderFillRect as renderFillRect
+  {
+   withRendererPtr* `Renderer' -- ^  The renderer which should draw a Rectangle.
+   , withPtr* `Rect' -- ^ The destination Rect.
   } -> `()' checkError*- #}

@@ -13,8 +13,10 @@ import System.Exit (exitFailure)
 import Interactive.SdlLogo
 import qualified Interactive.SdlLogoRenderer as R
 import Interactive.DrawLine
+import Interactive.DrawRect
 import Interactive.DrawPoints
 import Interactive.DrawLines
+import Interactive.DrawSlider
 
 main = do 
   showLogo "Tests/Interactive/sdl_logo.bmp"
@@ -22,4 +24,5 @@ main = do
   drawLine (0,0) (100,100)
   drawPoints
   drawLines
-
+  drawRect 5 5 100 100
+  drawSlider
