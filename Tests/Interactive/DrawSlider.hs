@@ -74,7 +74,7 @@ draw s = do
     handleEvent KeyDown{keysym = Keysym{keycode = Key_Escape}} =
       return ()
     handleEvent MouseButtonDown{x = x1, y = y1} =
-      draw s{btnPressed = True}
+      draw s{btnPressed = fst $ enclosedPoints [Point x1 y1] (button (slider s))}
     handleEvent MouseButtonUp{} = draw s{btnPressed = False}
     handleEvent MouseMotion{x = x1, y = y1} = do
        let xNorm = insideSlider x1 s
